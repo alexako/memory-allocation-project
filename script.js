@@ -8,6 +8,11 @@ let cycleCount = document.getElementById("cycle-count");
 // Dictionary of all process elements
 let processes = {};
 
+let processQueue = [];
+
+// Dictionary of all memory blocks
+let memoryBlocks = {};
+
 let runSimBtn = document.getElementById("run-sim-btn");
 let simRunning = false;
 
@@ -42,6 +47,7 @@ function runQueue() {
     }, 500);
 }
 
+// Load process into memory
 function loadProcess(process) {
     //let processes = processList.getElementsByTagName("li");
     //let process = processes[0];
@@ -53,22 +59,53 @@ function loadProcess(process) {
     processEl.innerHTML = "<span class=\"label\">" + process.element.innerHTML + "</span>";
     processEl.style.height = Math.round((process.size/500)*100) + "%";
     processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
-    
-    setTimeout(() => {
-        let memBlock = document.getElementById("memAddr-1");
-        memBlock.innerHTML = "";
-        memBlock.classList.remove("memory-block--unallocated");
-        memBlock.append(processEl);
 
-        process.element.remove();
-        delete processes[process.pid];
-    }, 5000);
-  
-  console.log("Loaded process:", process);
+    process.block = processEl;
+
+    console.log("Loading ", process.pid);
+    firstFit(process);
 }
 
 function killProcess(process) {
   
+}
+
+function firstFit(process) {
+    setTimeout(() => {
+        Object.keys(memoryBlocks).forEach((memId) => {
+            let memoryBlock = memoryBlocks[memId];
+            if (process.size <= memoryBlock.size
+                && memoryBlock.processes.length === 0) {
+                let memBlockElem = document.getElementById(memoryBlock.memId);
+                memBlockElem.innerHTML = "";
+
+                // FIX: This remove class from all elements
+                memBlockElem.classList.remove("memory-block--unallocated");
+
+                memBlockElem.append(process.block);
+                memoryBlock.processes.push(process);
+
+                process.element.remove();
+            }
+
+            else {
+                console.log("Can't load ", process.pid);
+                //TODO: Return process to queue 
+            }
+        });
+        //delete processes[process.pid];
+    }, 5000);
+  
+  console.log("Loaded process:", process);
+
+}
+
+function bestFit() {
+
+}
+
+function worstFit() {
+
 }
 
 function runSim() {
@@ -109,28 +146,39 @@ function updateUI() {
   }
 }
 
-function createBlocks() {
-  activeMemory.innerHTML = "";
-  let e = document.getElementById("block-size");
-  let blockSize = e.options[e.selectedIndex].value;
-  let memSize = 500;
-  let numOfBlocks = memSize/blockSize;
-  numOfBlocks = (memSize % blockSize !== 0) ? numOfBlocks -= 1 : numOfBlocks;
-  
-  for (let i = 0; i < numOfBlocks; i++) {
-    let blockEl = document.createElement("div");
-    blockEl.setAttribute("id", "memAddr-" + (i+1));
-    blockEl.className = "memory-block memory-block--unallocated";
-    blockEl.innerHTML = "<span class=\"label\">Unallocated</span>";
-    blockEl.style.height = ((100/numOfBlocks) - 0.5) + "%";
-    activeMemory.append(blockEl);
-  }
+// TODO: Add ability to create different sized blocks
+function createMemoryBlocks() {
+    activeMemory.innerHTML = "";
+    let e = document.getElementById("block-size");
+    let blockSize = e.options[e.selectedIndex].value;
+    let memSize = 500;
+    let numOfBlocks = memSize/blockSize;
+    numOfBlocks = (memSize % blockSize !== 0) ? numOfBlocks -= 1 : numOfBlocks;
+    
+    for (let i = 0; i < numOfBlocks; i++) {
+        let memId = "memAddr-" + (i+1);
+        let blockEl = document.createElement("div");
+        blockEl.setAttribute("id", memId);
+        blockEl.className = "memory-block memory-block--unallocated";
+        blockEl.innerHTML = "<span class=\"label\">Unallocated - " + blockSize + "kB</span>";
+        blockEl.style.height = ((100/numOfBlocks) - 0.5) + "%";
+        activeMemory.append(blockEl);
+
+        let memoryBlock = {
+            "memId": memId,
+            "size": e.options[e.selectedIndex].value,
+            "processes": [],
+            "element": blockEl
+        }
+
+        memoryBlocks[memId] = memoryBlock;
+    }
 }
 
 function reset() {
   cycleCount.innerHTML = 0;
   processList.innerHTML = "";
-  createBlocks();
+  createMemoryBlocks();
 }
 
 function incrementCycleCount() {
@@ -153,7 +201,8 @@ function createRandomProcesses() {
         let process = {
             "pid": pid,
             "size": procSize,
-            "element": processElem
+            "element": processElem,
+            "block": "" // Process block element in active memory
         }
         processes[process.pid] = process;
     }
@@ -165,5 +214,5 @@ function getRandomInRange(min, max) {
     return Math.random() * (max - min) + min;
 }
 
-createBlocks();
+createMemoryBlocks();
 
