@@ -1,0 +1,237 @@
+$grey: #333642;
+$mint-green: #4e9d84;
+$light-grey: #444857;
+$yellow: #ffdd40; 
+
+body {
+    padding: 0;
+    margin: 0;
+
+}
+
+.green { color: limegreen; }
+.active { color: highlight-yellow; }
+.inactive { color: red; }
+.active-btn { border-bottom: 3px solid $yellow; }
+
+.container {
+  font-family: 'Lato', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, Sans-Serif;
+  height: 100vh;
+  width: 100vw;
+  
+  display: flex;
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+  }
+  
+  .header {
+    display: flex;
+    
+    .controls {
+      flex-grow: 100;
+      color: snow;
+      background-color: $grey;
+      display: flex;
+      justify-content: flex-end;
+      
+      &__run-sim {
+        cursor: pointer;
+        &:hover {
+          background-color: $light-grey;
+        }
+        &:active {
+          background-color: $light-grey;
+        }
+      }
+      
+      &__algorithms {
+      }
+      
+      &__memory-size {}
+      &__memory-type {
+        cursor: pointer;
+        &:hover {
+          background-color: $light-grey;
+        }
+      }
+      &__compaction {}
+      &__coalescing {}
+      
+      div {
+        padding: 1.5em 2em;
+        margin-right: 1.5em;
+        white-space: nowrap;
+        border-bottom: 3px solid $light-grey;
+      }
+    }
+    
+    div { display: inline-block; }
+  }
+  
+  .sidebar {
+    display: flex;
+    flex-flow: column;
+    height: 100%; 
+    min-width: 250px;
+    background-color: $grey;
+    
+    .title {
+      color: snow;
+      background: $mint-green;
+      padding: 1.5em 2em;
+      border-bottom: 5px solid $mint-green;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+    
+    #processes {
+      flex: 1;
+      background: snow;
+      border-radius: 0.15em;
+      margin: 2em;
+      margin-bottom: 3em;
+      max-height: 300px;
+      
+      #processes-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+        li {
+          padding: 0.2em 0.5em;
+          &:nth-child(even) {
+            background-color: rgba(173, 216, 230, 0.24);
+          }
+        }
+      }
+    }
+    
+    #add-process-btn {
+      padding: 0.75em;
+      color: snow;
+      background-color: $light-grey;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      &:hover {
+        background-color: $light-grey;
+      }
+      &:active {
+        background-color: $light-grey;
+      }
+    }
+  }
+  
+  .content {
+    flex: 1;
+    display: flex;
+    flex-flow: row;
+    
+    #active-processes {
+      flex: 1;
+      padding: 0.75em;
+      margin: 1em 0 0 0;
+      text-decoration: none;
+      list-style: none;
+      color: $grey;
+      background-color: white;
+    }
+  }
+  
+  .left-side {
+    display: flex;
+    flex-flow: column;
+  }
+  
+  #current-process {
+    margin: 1em;
+    padding: 0.75em;
+    color: snow;
+    background-color: $grey;
+    display: flex;
+    flex-flow: column;
+    white-space: nowrap;
+    min-width: 300px;
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      
+      .state-container { min-width: 70px; }
+    }
+  }
+  
+  #current-process-info {
+    color: $grey;
+    background-color: white;
+    padding: 0.75em;
+    margin-top: 1em;
+  }
+  
+  #status {
+    flex: 1;
+    margin: 1em;
+    padding: 0.75em;
+    color: snow;
+    background-color: $grey;
+    display: flex;
+    flex-flow: column;
+    white-space: nowrap;
+    min-width: 300px;
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      
+      .state-container { min-width: 70px; }
+    }
+  }
+  
+  #memory {
+    flex: 1;
+    margin: 1em;
+    padding: 0.75em;
+    color: snow;
+    background-color: $grey;
+    display: flex;
+    flex-flow: column;
+    white-space: nowrap;
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      
+      .state-container { min-width: 156px; }
+    }
+  }
+  
+  #active-memory {
+    flex: 1;
+    color: $grey;
+    background-color: white;
+    padding: 0.75em;
+    margin-top: 1em;
+    overflow: scroll;
+  }
+}
+
+.memory-block {
+  height: 50%;
+  font-weight: 700;
+  color: white;
+  border: 1px solid black;
+  box-shadow: inset 0 0 0.25em black;
+  text-align: center;
+  
+  &--unallocated {
+    background-color: #758184;
+  }
+  
+  .label {
+    position: relative;
+    top: 45%;
+  }
+}

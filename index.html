@@ -1,0 +1,117 @@
+<html>
+    <head>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+        
+    <div class="container">
+  
+        <div class="sidebar">
+          <div class="title">
+            IT154-1L/EM01 Project
+          </div>
+          <div id="processes">
+            <ul id="processes-list"></ul>
+          </div>
+          <div id="add-process-btn"
+               onclick="createRandomProcesses()">
+            <i class="fas fa-plus"></i>
+            Create processes
+          </div>
+        </div>
+        
+        <div class="main-content">
+          
+          <div class="header">
+            <div class="controls">
+              
+              <div id="run-sim-btn"
+                   class="controls__run-sim"
+                   onclick="runSim()">
+                <i class="fas fa-play"></i>
+                Run
+              </div>
+      
+              <div class="controls__algorithms">
+                <i class="fas fa-calculator"></i>
+                <select name="algorithms"
+                        id="algorithms">
+                  <option value="first-fit">First-fit</option>
+                  <option value="best-fit">Best-fit</option>
+                  <option value="worst-fit">Worst-fit</option>
+                </select>
+              </div>
+      
+              <div class="controls__memory-size">
+                <i class="fas fa-memory"></i>
+                <select name="memory-size"
+                        id="block-size"
+                        onChange="reset()">
+                  <option value="50">50 kB</option>
+                  <option value="100">100 kB</option>
+                  <option value="150">150 kB</option>
+                  <option value="200">200 kB</option>
+                </select>
+              </div>
+              
+              <div class="controls__memory-type">
+                Fixed
+              </div>
+      
+              <div class="controls__compaction">Compaction</div>
+      
+              <div class="controls__coalescing">Coalescing</div>
+            </div> <!-- END controls -->
+          </div>
+        
+          <div class="content">
+            
+            <div class="left-side">
+              
+              <div id="current-process">
+                <div class="header">
+                  <div>
+                    Current Process
+                  </div>
+                  <div class="state-container">
+                    Cycle:
+                    <span id="cycle-count">0</span>
+                  </div>
+                </div>
+                <div id="current-process-info">
+                  Not running
+                </div>
+              </div>
+              
+              <div id="status">
+                <div class="header">
+                  <div>
+                    <span class="green">
+                      Active
+                    </span> Processes
+                  </div>
+                </div>
+                <ul id="active-processes">
+                </ul>
+              </div>
+            </div>
+            
+            <div id="memory">
+              <div class="header">
+                Memory Allocation Simulation
+                <span class="state-container">Status: 
+                  <span id="state" class="inactive">Not running</span>
+                </span>
+              </div>
+              <div id="active-memory">
+              </div>
+            </div>
+          </div>
+          
+        </div> <!-- END main-content -->
+        
+      </div>
+      <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>

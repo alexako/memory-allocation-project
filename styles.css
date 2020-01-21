@@ -1,0 +1,216 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.green {
+  color: limegreen;
+}
+
+.active {
+  color: highlight-yellow;
+}
+
+.inactive {
+  color: red;
+}
+
+.active-btn {
+  border-bottom: 3px solid #ffdd40;
+}
+
+.container {
+  font-family: "Lato", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Sans-Serif;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+}
+.container .main-content {
+  flex: 1;
+  display: flex;
+  flex-flow: column;
+}
+.container .header {
+  display: flex;
+}
+.container .header .controls {
+  flex-grow: 100;
+  color: snow;
+  background-color: #333642;
+  display: flex;
+  justify-content: flex-end;
+}
+.container .header .controls__run-sim {
+  cursor: pointer;
+}
+.container .header .controls__run-sim:hover {
+  background-color: #444857;
+}
+.container .header .controls__run-sim:active {
+  background-color: #444857;
+}
+.container .header .controls__memory-type {
+  cursor: pointer;
+}
+.container .header .controls__memory-type:hover {
+  background-color: #444857;
+}
+.container .header .controls div {
+  padding: 1.5em 2em;
+  margin-right: 1.5em;
+  white-space: nowrap;
+  border-bottom: 3px solid #444857;
+}
+.container .header div {
+  display: inline-block;
+}
+.container .sidebar {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  min-width: 250px;
+  background-color: #333642;
+}
+.container .sidebar .title {
+  color: snow;
+  background: #4e9d84;
+  padding: 1.5em 2em;
+  border-bottom: 5px solid #4e9d84;
+  white-space: nowrap;
+  font-weight: bold;
+}
+.container .sidebar #processes {
+  flex: 1;
+  background: snow;
+  border-radius: 0.15em;
+  margin: 2em;
+  margin-bottom: 3em;
+  max-height: 300px;
+}
+.container .sidebar #processes #processes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.container .sidebar #processes #processes-list li {
+  padding: 0.2em 0.5em;
+}
+.container .sidebar #processes #processes-list li:nth-child(even) {
+  background-color: rgba(173, 216, 230, 0.24);
+}
+.container .sidebar #add-process-btn {
+  padding: 0.75em;
+  color: snow;
+  background-color: #444857;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+.container .sidebar #add-process-btn:hover {
+  background-color: #444857;
+}
+.container .sidebar #add-process-btn:active {
+  background-color: #444857;
+}
+.container .content {
+  flex: 1;
+  display: flex;
+  flex-flow: row;
+}
+.container .content #active-processes {
+  flex: 1;
+  padding: 0.75em;
+  margin: 1em 0 0 0;
+  text-decoration: none;
+  list-style: none;
+  color: #333642;
+  background-color: white;
+}
+.container .left-side {
+  display: flex;
+  flex-flow: column;
+}
+.container #current-process {
+  margin: 1em;
+  padding: 0.75em;
+  color: snow;
+  background-color: #333642;
+  display: flex;
+  flex-flow: column;
+  white-space: nowrap;
+  min-width: 300px;
+}
+.container #current-process .header {
+  display: flex;
+  justify-content: space-between;
+}
+.container #current-process .header .state-container {
+  min-width: 70px;
+}
+.container #current-process-info {
+  color: #333642;
+  background-color: white;
+  padding: 0.75em;
+  margin-top: 1em;
+}
+.container #status {
+  flex: 1;
+  margin: 1em;
+  padding: 0.75em;
+  color: snow;
+  background-color: #333642;
+  display: flex;
+  flex-flow: column;
+  white-space: nowrap;
+  min-width: 300px;
+}
+.container #status .header {
+  display: flex;
+  justify-content: space-between;
+}
+.container #status .header .state-container {
+  min-width: 70px;
+}
+.container #memory {
+  flex: 1;
+  margin: 1em;
+  padding: 0.75em;
+  color: snow;
+  background-color: #333642;
+  display: flex;
+  flex-flow: column;
+  white-space: nowrap;
+}
+.container #memory .header {
+  display: flex;
+  justify-content: space-between;
+}
+.container #memory .header .state-container {
+  min-width: 156px;
+}
+.container #active-memory {
+  flex: 1;
+  color: #333642;
+  background-color: white;
+  padding: 0.75em;
+  margin-top: 1em;
+  overflow: scroll;
+}
+
+.memory-block {
+  height: 50%;
+  font-weight: 700;
+  color: white;
+  border: 1px solid black;
+  box-shadow: inset 0 0 0.25em black;
+  text-align: center;
+}
+.memory-block--unallocated {
+  background-color: #758184;
+}
+.memory-block .label {
+  position: relative;
+  top: 45%;
+}
+
+/*# sourceMappingURL=styles.css.map */
