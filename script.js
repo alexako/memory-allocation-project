@@ -5,6 +5,9 @@ let activeMemory = document.getElementById("active-memory");
 let memoryState = document.getElementById("state");
 let cycleCount = document.getElementById("cycle-count");
 
+// Dictionary of all process elements
+let processes = {};
+
 let runSimBtn = document.getElementById("run-sim-btn");
 let simRunning = false;
 
@@ -20,54 +23,76 @@ let blockColors = [
   "#3c9099"
 ];
 
-
 function addProcess(process) {
-  processList.append(process);
+    processList.appendChild(process);
 }
 
-function loadProcess() {
-  let processes = processList.getElementsByTagName("li");
-  let process = processes[0];
+function queueProcess(process) {
+    activeProcesses.appendChild(process);
+}
 
-  let procSize = parseInt(process.innerHTML.split(" ")[3].slice(0, -2));
+function runQueue() {
+    let processCount = Object.keys(processes).length;
+    let count = 0;
+    let interval = setInterval(() => {
+        count += 1;
+        queueProcess(processes["pid-" + count]);
+        loadProcess(processes["pid-" + count]);
+        if (count >= processCount) { clearInterval(interval); }
+    }, 500);
+}
 
-  // Load process into memory block
-  let processEl = document.createElement("div");
-  processEl.className = "memory-block memory-block--unallocated";
-  processEl.innerHTML = "<span class=\"label\">" + process.innerHTML + "</span>";
-  processEl.style.height = Math.round((procSize/500)*100) + "%";
-  processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
-  
-  let memBlock = document.getElementById("pid-1");
-  memBlock.innerHTML = "";
-  memBlock.append(processEl);
+function loadProcess(process) {
+    //let processes = processList.getElementsByTagName("li");
+    //let process = processes[0];
+
+
+    let procSize = parseInt(process.innerHTML.split(" ")[3].slice(0, -2));
+    let pid = process.getAttribute("id");
+
+    // Load process into memory block
+    let processEl = document.createElement("div");
+    processEl.setAttribute("id", "pid-" + pid);
+    processEl.className = "memory-block memory-block--process";
+    processEl.innerHTML = "<span class=\"label\">" + process.innerHTML + "</span>";
+    processEl.style.height = Math.round((procSize/500)*100) + "%";
+    processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
+    
+    setTimeout(() => {
+        let memBlock = document.getElementById("memAddr-1");
+        memBlock.innerHTML = "";
+        memBlock.classList.remove("memory-block--unallocated");
+        memBlock.append(processEl);
+
+        process.remove();
+    }, 5000);
   
   console.log("Loaded process:", process);
 }
 
-function removeProcess(pid) {
+function killProcess(process) {
   
 }
 
 function runSim() {
   
-  loadProcess();
+    runQueue();
   
-  return;
-  
-  if (simRunning) {
-    clearInterval(window.simProcess);
-    simRunning = false;
-    reset();
-  }
-  
-  if (processes.length > 0 && !simRunning) {
-    window.simProcess = setInterval(frame, 1000);
-    simRunning = true;
-    loadProcess();
-  } 
-  
-  runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
+    return;
+    
+    if (simRunning) {
+        clearInterval(window.simProcess);
+        simRunning = false;
+        reset();
+    }
+    
+    if (processes.length > 0 && !simRunning) {
+        window.simProcess = setInterval(frame, 1000);
+        simRunning = true;
+        loadProcess();
+    } 
+    
+    runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
 }
 
 function frame() {
@@ -97,7 +122,7 @@ function createBlocks() {
   
   for (let i = 0; i < numOfBlocks; i++) {
     let blockEl = document.createElement("div");
-    blockEl.setAttribute("id", "pid-" + (i+1));
+    blockEl.setAttribute("id", "memAddr-" + (i+1));
     blockEl.className = "memory-block memory-block--unallocated";
     blockEl.innerHTML = "<span class=\"label\">Unallocated</span>";
     blockEl.style.height = ((100/numOfBlocks) - 0.5) + "%";
@@ -119,12 +144,13 @@ function incrementCycleCount() {
 
 function createRandomProcesses() {
   processList.innerHTML = '';
-  for (let i = 0; i < getRandomInRange(3, 7); i++) {
-    let process = document.createElement("li");
-    let pid = (i+1).toString();
-    process.setAttribute("id", pid);
-    process.innerHTML = "PID: " + pid + " - " + Math.round(getRandomInRange(50, 300)) + "kB";
+  let processCount = Object.keys(processes).length;
+  for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
+    let process = document.createElement("div");
+    process.setAttribute("id", "pid-" + (i+1));
+    process.innerHTML = "PID: " + (i+1) + " - " + Math.round(getRandomInRange(50, 300)) + "kB";
     addProcess(process);
+    processes["pid-" + (i+1)] = process;
   }
   
   updateUI();

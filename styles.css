@@ -79,7 +79,7 @@ body {
   white-space: nowrap;
   font-weight: bold;
 }
-.container .sidebar #processes {
+.container .sidebar #processes-list {
   flex: 1;
   background: snow;
   border-radius: 0.15em;
@@ -87,15 +87,10 @@ body {
   margin-bottom: 3em;
   max-height: 300px;
 }
-.container .sidebar #processes #processes-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.container .sidebar #processes #processes-list li {
+.container .sidebar #processes-list div {
   padding: 0.2em 0.5em;
 }
-.container .sidebar #processes #processes-list li:nth-child(even) {
+.container .sidebar #processes-list div:nth-child(even) {
   background-color: rgba(173, 216, 230, 0.24);
 }
 .container .sidebar #add-process-btn {
@@ -204,13 +199,15 @@ body {
   border: 1px solid black;
   box-shadow: inset 0 0 0.25em black;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+.memory-block--process .label {
+  display: none;
 }
 .memory-block--unallocated {
   background-color: #758184;
-}
-.memory-block .label {
-  position: relative;
-  top: 45%;
+  justify-content: center;
 }
 
 /*# sourceMappingURL=styles.css.map */

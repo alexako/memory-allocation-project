@@ -87,7 +87,7 @@ body {
       font-weight: bold;
     }
     
-    #processes {
+    #processes-list {
       flex: 1;
       background: snow;
       border-radius: 0.15em;
@@ -95,16 +95,10 @@ body {
       margin-bottom: 3em;
       max-height: 300px;
       
-      #processes-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        
-        li {
-          padding: 0.2em 0.5em;
-          &:nth-child(even) {
-            background-color: rgba(173, 216, 230, 0.24);
-          }
+      div {
+        padding: 0.2em 0.5em;
+        &:nth-child(even) {
+          background-color: rgba(173, 216, 230, 0.24);
         }
       }
     }
@@ -225,13 +219,15 @@ body {
   border: 1px solid black;
   box-shadow: inset 0 0 0.25em black;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+
+  &--process {
+      .label { display: none; }
+  }
   
   &--unallocated {
     background-color: #758184;
-  }
-  
-  .label {
-    position: relative;
-    top: 45%;
+    justify-content: center;
   }
 }
