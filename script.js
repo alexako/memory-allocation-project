@@ -27,12 +27,15 @@ function addProcess(process) {
 
 function loadProcess() {
   let processes = processList.getElementsByTagName("li");
-  console.log("processes:", processes);
   let process = processes[0];
-  let processEL = document.createElement("div");
+
+  let procSize = parseInt(process.innerHTML.split(" ")[3].slice(0, -2));
+
+  // Load process into memory block
+  let processEl = document.createElement("div");
   processEl.className = "memory-block memory-block--unallocated";
   processEl.innerHTML = "<span class=\"label\">" + process.innerHTML + "</span>";
-  processEl.style.height = 20 + "%";
+  processEl.style.height = Math.round((procSize/500)*100) + "%";
   processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
   
   let memBlock = document.getElementById("pid-1");
@@ -93,13 +96,12 @@ function createBlocks() {
   numOfBlocks = (memSize % blockSize !== 0) ? numOfBlocks -= 1 : numOfBlocks;
   
   for (let i = 0; i < numOfBlocks; i++) {
-
     let blockEl = document.createElement("div");
     blockEl.setAttribute("id", "pid-" + (i+1));
     blockEl.className = "memory-block memory-block--unallocated";
     blockEl.innerHTML = "<span class=\"label\">Unallocated</span>";
     blockEl.style.height = ((100/numOfBlocks) - 0.5) + "%";
-    activeMemory.append(block);
+    activeMemory.append(blockEl);
   }
 }
 
