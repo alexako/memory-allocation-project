@@ -36,7 +36,7 @@ function runQueue() {
     let count = 0;
     let interval = setInterval(() => {
         count += 1;
-        queueProcess(processes["pid-" + count]);
+        queueProcess(processes["pid-" + count].element);
         loadProcess(processes["pid-" + count]);
         if (count >= processCount) { clearInterval(interval); }
     }, 500);
@@ -46,16 +46,12 @@ function loadProcess(process) {
     //let processes = processList.getElementsByTagName("li");
     //let process = processes[0];
 
-
-    let procSize = parseInt(process.innerHTML.split(" ")[3].slice(0, -2));
-    let pid = process.getAttribute("id");
-
     // Load process into memory block
     let processEl = document.createElement("div");
-    processEl.setAttribute("id", "pid-" + pid);
+    processEl.setAttribute("id", "pid-" + process.pid);
     processEl.className = "memory-block memory-block--process";
-    processEl.innerHTML = "<span class=\"label\">" + process.innerHTML + "</span>";
-    processEl.style.height = Math.round((procSize/500)*100) + "%";
+    processEl.innerHTML = "<span class=\"label\">" + process.element.innerHTML + "</span>";
+    processEl.style.height = Math.round((process.size/500)*100) + "%";
     processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
     
     setTimeout(() => {
@@ -64,7 +60,8 @@ function loadProcess(process) {
         memBlock.classList.remove("memory-block--unallocated");
         memBlock.append(processEl);
 
-        process.remove();
+        process.element.remove();
+        delete processes[process.pid];
     }, 5000);
   
   console.log("Loaded process:", process);
@@ -143,17 +140,25 @@ function incrementCycleCount() {
 }
 
 function createRandomProcesses() {
-  processList.innerHTML = '';
-  let processCount = Object.keys(processes).length;
-  for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
-    let process = document.createElement("div");
-    process.setAttribute("id", "pid-" + (i+1));
-    process.innerHTML = "PID: " + (i+1) + " - " + Math.round(getRandomInRange(50, 300)) + "kB";
-    addProcess(process);
-    processes["pid-" + (i+1)] = process;
-  }
-  
-  updateUI();
+    processList.innerHTML = '';
+    let processCount = Object.keys(processes).length;
+    for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
+        let pid = "pid-" + (i+1);
+        let procSize = Math.round(getRandomInRange(50, 300))
+        let processElem = document.createElement("div");
+        processElem.setAttribute("id", pid);
+        processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB";
+        addProcess(processElem);
+
+        let process = {
+            "pid": pid,
+            "size": procSize,
+            "element": processElem
+        }
+        processes[process.pid] = process;
+    }
+    
+    updateUI();
 }
 
 function getRandomInRange(min, max) {
