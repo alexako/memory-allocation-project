@@ -131,20 +131,20 @@ function runSim() {
 }
 
 function frame() {
-  loadProcess();
-  incrementCycleCount();
-  updateUI();
+    loadProcess();
+    incrementCycleCount();
+    updateUI();
 }
 
 function updateUI() {
-  if (processes.length === 0) {
-    let placeholder = document.createElement("li");
-    placeholder.innerHTML = "No processes...";
-    processList.append(placeholder);
-    runSimBtn.disabled = true;
-  } else {
-    runSimBtn.disabled = false;
-  }
+    if (processes.length === 0) {
+        let placeholder = document.createElement("li");
+        placeholder.innerHTML = "No processes...";
+        processList.append(placeholder);
+        runSimBtn.disabled = true;
+    } else {
+        runSimBtn.disabled = false;
+    }
 }
 
 // TODO: Add ability to create different sized blocks
@@ -156,9 +156,6 @@ function createMemoryBlocks() {
     const totalMem = parseInt(el.options[el.selectedIndex].value);
     const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
 
-    console.log("totalMem:", totalMem);
-    console.log("numOfBlocks:", numOfBlocks);
-    
     for (let i = 0; i < numOfBlocks; i++) {
         const memId = "memAddr-" + (i+1);
         const blockSize = Math.round((totalMem/numOfBlocks) + getRandomInRange(-40, 40));
@@ -201,9 +198,9 @@ function createRandomProcesses() {
     const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
     const processCount = Object.keys(processes).length;
     for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
-        let pid = "pid-" + (i+1);
-        let procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
-        let processElem = document.createElement("div");
+        const pid = "pid-" + (i+1);
+        const procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
+        const processElem = document.createElement("div");
         processElem.setAttribute("id", pid);
         processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB";
         addProcess(processElem);
