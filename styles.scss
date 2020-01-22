@@ -222,9 +222,11 @@ body {
   flex-direction: column;
 
   &--process {
-      .label { display: none; }
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
-  
+
   &--unallocated {
     background-color: #758184;
     justify-content: center;

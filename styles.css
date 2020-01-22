@@ -201,8 +201,10 @@ body {
   display: flex;
   flex-direction: column;
 }
-.memory-block--process .label {
-  display: none;
+.memory-block--process {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .memory-block--unallocated {
   background-color: #758184;
