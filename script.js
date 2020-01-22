@@ -5,6 +5,7 @@ let activeMemory = document.getElementById("active-memory");
 let memoryState = document.getElementById("state");
 let cycleCount = document.getElementById("cycle-count");
 
+
 // Dictionary of all process elements
 let processes = {};
 
@@ -148,25 +149,29 @@ function updateUI() {
 
 // TODO: Add ability to create different sized blocks
 function createMemoryBlocks() {
+
     activeMemory.innerHTML = "";
-    let e = document.getElementById("block-size");
-    let blockSize = e.options[e.selectedIndex].value;
-    let memSize = 500;
-    let numOfBlocks = memSize/blockSize;
-    numOfBlocks = (memSize % blockSize !== 0) ? numOfBlocks -= 1 : numOfBlocks;
+    const el = document.getElementById("total-memory-size");
+    const e = document.getElementById("num-of-blocks");
+    const totalMem = parseInt(el.options[el.selectedIndex].value);
+    const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
+
+    console.log("totalMem:", totalMem);
+    console.log("numOfBlocks:", numOfBlocks);
     
     for (let i = 0; i < numOfBlocks; i++) {
-        let memId = "memAddr-" + (i+1);
-        let blockEl = document.createElement("div");
+        const memId = "memAddr-" + (i+1);
+        const blockSize = Math.round((totalMem/numOfBlocks) + getRandomInRange(-40, 40));
+        const blockEl = document.createElement("div");
         blockEl.setAttribute("id", memId);
         blockEl.className = "memory-block memory-block--unallocated";
         blockEl.innerHTML = "<span class=\"label\">Unallocated - " + blockSize + "kB</span>";
-        blockEl.style.height = ((100/numOfBlocks) - 0.5) + "%";
+        blockEl.style.height = ((blockSize/totalMem) * 100) + "%";
         activeMemory.append(blockEl);
 
         let memoryBlock = {
             "memId": memId,
-            "size": e.options[e.selectedIndex].value,
+            "size": blockSize,
             "processes": [],
             "element": blockEl
         }
@@ -176,23 +181,28 @@ function createMemoryBlocks() {
 }
 
 function reset() {
-  cycleCount.innerHTML = 0;
-  processList.innerHTML = "";
-  createMemoryBlocks();
+    activeProcesses.innerHTML = "";
+    cycleCount.innerHTML = 0;
+    processList.innerHTML = "";
+    createMemoryBlocks();
 }
 
 function incrementCycleCount() {
-  let count = parseInt(cycleCount.innerHTML);
-  count += 1;
-  cycleCount.innerHTML = count;
+    let count = parseInt(cycleCount.innerHTML);
+    count += 1;
+    cycleCount.innerHTML = count;
 }
 
 function createRandomProcesses() {
     processList.innerHTML = '';
-    let processCount = Object.keys(processes).length;
+    const el = document.getElementById("total-memory-size");
+    const e = document.getElementById("num-of-blocks");
+    const totalMem = parseInt(el.options[el.selectedIndex].value);
+    const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
+    const processCount = Object.keys(processes).length;
     for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
         let pid = "pid-" + (i+1);
-        let procSize = Math.round(getRandomInRange(50, 300))
+        let procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
         let processElem = document.createElement("div");
         processElem.setAttribute("id", pid);
         processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB";

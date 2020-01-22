@@ -44,16 +44,31 @@
                   <option value="worst-fit">Worst-fit</option>
                 </select>
               </div>
+
+              <div class="controls__memory-size">
+                <i class="fas fa-memory"></i>
+                <select name="total-memory-size"
+                        id="total-memory-size"
+                        onChange="reset()">
+                  <option value="256">256kB</option>
+                  <option value="512">512kB</option>
+                  <option value="1024">1GB</option>
+                  <option value="2048">2GB</option>
+                </select>
+              </div>
       
               <div class="controls__memory-size">
                 <i class="fas fa-memory"></i>
                 <select name="memory-size"
-                        id="block-size"
+                        id="num-of-blocks"
                         onChange="reset()">
-                  <option value="50">50 kB</option>
-                  <option value="100">100 kB</option>
-                  <option value="150">150 kB</option>
-                  <option value="200">200 kB</option>
+                  <option value="2">2 blocks</option>
+                  <option value="3">3 blocks</option>
+                  <option value="4">4 blocks</option>
+                  <option value="5">5 blocks</option>
+                  <option value="6">6 blocks</option>
+                  <option value="7">7 blocks</option>
+                  <option value="8">8 blocks</option>
                 </select>
               </div>
               
