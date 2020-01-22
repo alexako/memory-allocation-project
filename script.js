@@ -9,6 +9,7 @@ let cycleCount = document.getElementById("cycle-count");
 // Dictionary of all process elements
 let processes = {};
 
+// Far left window
 let processQueue = [];
 
 // Dictionary of all memory blocks
@@ -48,12 +49,9 @@ function runQueue() {
     }, 500);
 }
 
-// Load process into memory
+// Load process into memory block
 function loadProcess(process) {
-    //let processes = processList.getElementsByTagName("li");
-    //let process = processes[0];
 
-    // Load process into memory block
     let processEl = document.createElement("div");
     processEl.setAttribute("id", "pid-" + process.pid);
     processEl.className = "memory-block memory-block--process";
@@ -64,7 +62,11 @@ function loadProcess(process) {
     process.block = processEl;
 
     console.log("Loading ", process.pid);
+
+    // TODO: Get selected algo then imp in switch
     firstFit(process);
+    bestFit();
+    worstFit();
 }
 
 function killProcess(process) {
