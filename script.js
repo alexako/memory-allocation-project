@@ -76,25 +76,31 @@ function killProcess(process) {
 function firstFit(process) {
     setTimeout(() => {
         Object.keys(memoryBlocks).forEach((memId) => {
-            let memoryBlock = memoryBlocks[memId];
-            if (process.size <= memoryBlock.size
-                && memoryBlock.processes.length === 0) {
-                let memBlockElem = document.getElementById(memoryBlock.memId);
-                memBlockElem.innerHTML = "";
+            setTimeout(() => {
+                console.group();
+                console.log("checking ", memId);
+                let memoryBlock = memoryBlocks[memId];
+                console.log("pSize:", process.size, "mSize:", memoryBlock.size, process.size <= memoryBlock.size);
+                if (process.size <= memoryBlock.size
+                    && memoryBlock.processes.length === 0) {
+                    let memBlockElem = document.getElementById(memoryBlock.memId);
+                    memBlockElem.innerHTML = "";
 
-                // FIX: This remove class from all elements
-                memBlockElem.classList.remove("memory-block--unallocated");
+                    // FIX: This remove class from all elements
+                    memBlockElem.classList.remove("memory-block--unallocated");
 
-                memBlockElem.append(process.block);
-                memoryBlock.processes.push(process);
+                    memBlockElem.append(process.block);
+                    memoryBlock.processes.push(process);
 
-                process.element.remove();
-            }
+                    process.element.remove();
+                }
 
-            else {
-                console.log("Can't load ", process.pid);
-                //TODO: Return process to queue 
-            }
+                else {
+                    console.log("Can't load ", process.pid);
+                    //TODO: Return process to queue 
+                }
+                console.groupEnd();
+            }, 1000);
         });
         //delete processes[process.pid];
     }, 5000);
@@ -159,13 +165,16 @@ function createMemoryBlocks() {
     const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
 
     for (let i = 0; i < numOfBlocks; i++) {
+        const memSoFar = Object.keys(memoryBlocks).map((k) => { return memoryBlocks[k].size; })
+        const blockSize = (i === numOfBlocks - 1) // Last block fills remaining memory
+            ? totalMem - memSoFar.reduce((t, c) => { return t + c; })
+            : Math.round((totalMem/numOfBlocks) + getRandomInRange(-40, 40));
         const memId = "memAddr-" + (i+1);
-        const blockSize = Math.round((totalMem/numOfBlocks) + getRandomInRange(-40, 40));
         const blockEl = document.createElement("div");
         blockEl.setAttribute("id", memId);
         blockEl.className = "memory-block memory-block--unallocated";
         blockEl.innerHTML = "<span class=\"label\">Unallocated - " + blockSize + "kB</span>";
-        blockEl.style.height = ((blockSize/totalMem) * 100) + "%";
+        blockEl.style.height = Math.round((blockSize/totalMem) * 100) - 1 + "%";
         activeMemory.append(blockEl);
 
         let memoryBlock = {
