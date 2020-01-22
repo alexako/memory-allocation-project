@@ -34,6 +34,7 @@ function addProcess(process) {
     processList.appendChild(process);
 }
 
+// param: Process element
 function queueProcess(process) {
     activeProcesses.appendChild(process);
 }
@@ -52,16 +53,13 @@ function runQueue() {
 // Load process into memory block
 function loadProcess(process) {
 
-    let processEl = document.createElement("div");
+    const processEl = document.createElement("div");
     processEl.setAttribute("id", "pid-" + process.pid);
     processEl.className = "memory-block memory-block--process";
     processEl.innerHTML = "<span class=\"label\">" + process.element.innerHTML + "</span>";
-    processEl.style.height = Math.round((process.size/500)*100) + "%";
     processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
 
     process.block = processEl;
-
-    console.log("Loading ", process.pid);
 
     // TODO: Get selected algo then imp in switch
     firstFit(process);
@@ -75,33 +73,41 @@ function killProcess(process) {
 
 function firstFit(process) {
     setTimeout(() => {
-        Object.keys(memoryBlocks).forEach((memId) => {
-            setTimeout(() => {
-                console.group();
-                console.log("checking ", memId);
-                let memoryBlock = memoryBlocks[memId];
-                console.log("pSize:", process.size, "mSize:", memoryBlock.size, process.size <= memoryBlock.size);
-                if (process.size <= memoryBlock.size
-                    && memoryBlock.processes.length === 0) {
-                    let memBlockElem = document.getElementById(memoryBlock.memId);
-                    memBlockElem.innerHTML = "";
+        process.element.style = "color: green; font-weight: 700;";
+        console.group("Loading:", process.pid);
+        setTimeout(() => {
+            Object.keys(memoryBlocks).some((memId) => {
+                //setTimeout(() => {
+                    console.log("checking ", memId);
+                    const memoryBlock = memoryBlocks[memId];
+                    console.log("pSize:", process.size, "mSize:", memoryBlock.size, process.size <= memoryBlock.size);
+                    if (process.size <= memoryBlock.size
+                        && memoryBlock.processes.length === 0) {
 
-                    // FIX: This remove class from all elements
-                    memBlockElem.classList.remove("memory-block--unallocated");
+                        process.block.style.height = (process.size/memoryBlock.size) * 100 + "%";
+                        let memBlockElem = document.getElementById(memoryBlock.memId);
+                        memBlockElem.innerHTML = "";
 
-                    memBlockElem.append(process.block);
-                    memoryBlock.processes.push(process);
+                        // FIX: This remove class from all elements
+                        //memBlockElem.classList.remove("memory-block--unallocated");
 
-                    process.element.remove();
-                }
+                        memBlockElem.style.justifyContent = "start";
+                        memBlockElem.append(process.block);
+                        memoryBlock.processes.push(process);
 
-                else {
-                    console.log("Can't load ", process.pid);
-                    //TODO: Return process to queue 
-                }
-                console.groupEnd();
-            }, 1000);
-        });
+                        process.element.remove();
+                        return true;
+                    }
+
+                    else {
+                        console.log("Can't load ", process.pid);
+                        process.element.style = "color: red;";
+                        //TODO: Return process to queue 
+                    }
+                    console.groupEnd("Loading:", process.pid);
+                //}, 1000);
+            });
+        }, 500);
         //delete processes[process.pid];
     }, 5000);
   
