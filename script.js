@@ -9,8 +9,11 @@ let cycleCount = document.getElementById("cycle-count");
 // Dictionary of all process elements
 let processes = {};
 
-// List of loaded/active processes
+// List of active processes (loaded into memory)
 let activeProcesses = [];
+
+// List of current Processes
+let currentProcessWindow = [];
 
 // Far left window
 let processQueue = [];
@@ -56,16 +59,23 @@ function loadProcess(process) {
 }
 
 function killProcess(process) {
+    console.group();
+    console.log("killing process:", process.pid, currentProcessWindow);
+
     process.element.remove();
     process.block.remove();
     activeProcesses = activeProcesses.filter((proc) => { return proc.pid !== process.pid; });
+    currentProcessWindow = currentProcessWindow.filter((proc) => { return proc[0].pid !== process.pid; });
     delete processes[process.pid];
+
+    console.log("processes:", processes);
+    console.log("activeProcesses:", activeProcesses);
+    console.log("currentProcessWindow:", currentProcessWindow);
+    console.groupEnd();
 }
 
 // TODO: Add time cycle property to process
 function firstFit(process) {
-    console.group("Loading:", process.pid);
-
     memoryState.classList.remove("inactive");
 
     const processIndex = parseInt(process.pid.slice(-1));
@@ -86,14 +96,11 @@ function firstFit(process) {
                 let memBlockElem = document.getElementById(memoryBlock.memId);
                 memBlockElem.innerHTML = "";
 
-                let procedure = document.createElement("div");
-                procedure.innerHTML = "PID: " + process.pid.split("-")[1] + " => Mem Addr: " + memId.split("-")[1];
-                currentProcess.append(procedure);
-
                 memBlockElem.style.justifyContent = "start";
                 memBlockElem.append(process.block);
                 memoryBlock.processes.push(process);
                 activeProcesses.push(process);
+                currentProcessWindow.push([process, memoryBlock]);
 
                 process.element.remove();
 
@@ -101,18 +108,17 @@ function firstFit(process) {
             }
 
             else {
-                console.log("Can't load ", process.pid);
                 process.element.style = "color: red;";
+                memoryBlock.processes = memoryBlock.processes.filter((proc) => { return proc.life > 0; });
+                console.log(memId, memoryBlock.processes);
                 //TODO: Return process to queue 
             }
-            console.groupEnd("Loading:", process.pid);
             memoryBlock.element.style.border = "1px solid black";
+            loadCurrentProcessState();
         });
     // END iterate memory blocks
     
     }, processDelay);
-
-    console.log("Loaded process:", process);
 
 }
 
@@ -122,6 +128,21 @@ function bestFit() {
 
 function worstFit() {
 
+}
+
+function loadCurrentProcessState() {
+    currentProcess.innerHTML = "";
+    console.log("update current process window");
+    for (let entry in currentProcessWindow) {
+        let process = currentProcessWindow[entry][0];
+        let memoryBlock = currentProcessWindow[entry][1];
+        let procedure = document.createElement("div");
+        procedure.setAttribute("id", "c" + procedure.pid);
+        procedure.innerHTML = "PID: " + process.pid.split("-")[1]
+            + " => Mem Addr: " + memoryBlock.memId.split("-")[1]
+            + " Life: " + process.life;
+        currentProcess.append(procedure);
+    }
 }
 
 function runSim() {
@@ -141,20 +162,6 @@ function runSim() {
         if (numOfProcesses <= 0) { clearInterval(interval); }
     }, framerate); */
   
-    return;
-    
-    if (simRunning) {
-        clearInterval(window.simProcess);
-        simRunning = false;
-        reset();
-    }
-    
-    if (processes.length > 0 && !simRunning) {
-        window.simProcess = setInterval(frame, 1000);
-        simRunning = true;
-        loadProcess();
-    } 
-    
     runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
 }
 
@@ -163,8 +170,18 @@ function frame() {
         if (!isActive(processes[pid])) { loadProcess(processes[pid]); }
     }
 
-    for (let process in activeProcesses) {
-        if (process.life <= 0) { killProcess(process); }
+    // Clean up finished processes
+    for (let i in activeProcesses) {
+        let process = activeProcesses[i];
+        if (typeof(process) !== 'undefined' && process.life <= 0) { killProcess(process); }
+    }
+
+    // Clean up processes in memory
+    for (let memId in memoryBlocks) {
+        let mBlock = memoryBlocks[memId];
+        for (let process in mBlock.processes) {
+            if (typeof(process) !== 'undefined' && process.life <= 0) { killProcess(process); }
+        }
     }
 
     incrementCycleCount();
@@ -179,6 +196,7 @@ function updateUI() {
         processList.append(placeholder);
         runSimBtn.disabled = true;
     } else {
+        loadCurrentProcessState();
         runSimBtn.disabled = false;
     }
 }
@@ -229,11 +247,12 @@ function createRandomProcesses() {
     for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
         const pid = "pid-" + (i+1);
         const procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
+        const life = Math.round(getRandomInRange(1, 4)); // Number of cycles needed to complete
 
         // List element
         const processElem = document.createElement("div");
         processElem.setAttribute("id", pid);
-        processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB";
+        processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB - " + life;
 
         // Memory Element
         const processEl = document.createElement("div");
@@ -248,7 +267,7 @@ function createRandomProcesses() {
         let process = {
             "pid": pid,
             "size": procSize,
-            "life": Math.round(getRandomInRange(1, 4)), // Number of cycles needed to complete
+            "life": life, // Number of cycles needed to complete
             "element": processElem, // Process element in queues
             "block": processEl // Process block element in active memory
         }
@@ -277,7 +296,7 @@ function incrementCycleCount() {
 
 function isActive(process) {
     for (let proc in activeProcesses) {
-        if (proc.pid === process.pid) {
+        if (activeProcesses[proc].pid === process.pid) {
             return true;
         }
     }
