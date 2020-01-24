@@ -3,7 +3,8 @@ let currentProcess = document.getElementById("current-process-info");
 let activeProcessesElem = document.getElementById("active-processes");
 let activeMemory = document.getElementById("active-memory");
 let memoryState = document.getElementById("state");
-let cycleCount = document.getElementById("cycle-count");
+let cycleCountElem = document.getElementById("cycle-count");
+let cycleCount = parseInt(cycleCountElem.innerHTML);
 
 
 // Dictionary of all process elements
@@ -50,12 +51,14 @@ function queueProcess(process) {
 // Load process into memory block via algorithms (First fit, Best fit, Worst fit)
 function loadProcess(process) {
 
+    if (isActive(process)) { return; }
+
+    console.log("loading:", process.pid);
+
     // TODO: Get selected algo then imp in switch
     firstFit(process);
     bestFit();
     worstFit();
-
-    process.life -= 1;
 }
 
 function killProcess(process) {
@@ -87,6 +90,7 @@ function firstFit(process) {
         // Iterate memory blocks
         Object.keys(memoryBlocks).some((memId) => {
             const memoryBlock = memoryBlocks[memId];
+            console.log(memId, memoryBlock);
             if (process.size <= memoryBlock.size
                 && memoryBlock.processes.length === 0) {
                 
@@ -109,7 +113,13 @@ function firstFit(process) {
 
             else {
                 process.element.style = "color: red;";
-                memoryBlock.processes = memoryBlock.processes.filter((proc) => { return proc.life > 0; });
+                if (memoryBlock.processes.length > 0) {
+                    if (memoryBlock.processes[0].life <= 0) {
+                        memoryBlock.processes = [];
+                        memoryBlock.element.style.justifyContent = "center";
+                        memoryBlock.element.innerHTML = "Unallocated - " + memoryBlock.size + "kB";
+                    }
+                }
                 //TODO: Return process to queue 
             }
             memoryBlock.element.style.border = "1px solid black";
@@ -117,7 +127,8 @@ function firstFit(process) {
         });
     // END iterate memory blocks
     
-    }, processDelay);
+    // }, processDelay);
+    }, 0);
 
 }
 
@@ -130,7 +141,9 @@ function worstFit() {
 }
 
 function loadCurrentProcessState() {
-    currentProcess.innerHTML = Object.keys(activeProcesses).length === 0 ? "<div>Click run to start</div>" : "";
+    currentProcess.innerHTML = Object.keys(activeProcesses).length === 0 && cycleCount === 0
+        ? "<div>Click run to start</div>"
+        : "";
     for (let entry in currentProcessWindow) {
         let process = currentProcessWindow[entry][0];
         let memoryBlock = currentProcessWindow[entry][1];
@@ -140,6 +153,13 @@ function loadCurrentProcessState() {
             + " => Mem Addr: " + memoryBlock.memId.split("-")[1]
             + " Cycles: " + process.life;
         currentProcess.append(procedure);
+    }
+
+    if (Object.entries(processes).length === 0 && cycleCount > 0) { 
+        currentProcess.innerHTML = "";
+        let state = document.createElement("div");
+        state.innerHTML = "<div>All processes completed!</div>";
+        currentProcess.append(state);
     }
 }
 
@@ -153,19 +173,20 @@ function runSim() {
         queueProcess(processes[pid].element);
     }
 
-    frame();
+    // frame();
 
-/*     const interval = setInterval(() => {
+    const interval = setInterval(() => {
         frame();
         if (numOfProcesses <= 0) { clearInterval(interval); }
-    }, framerate); */
+    }, framerate);
   
     runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
 }
 
 function frame() {
     for (let pid in processes) {
-        if (!isActive(processes[pid])) { loadProcess(processes[pid]); }
+        if (isActive(processes[pid])) { processes[pid].life -= 1; }
+        loadProcess(processes[pid]);
     }
 
     // Clean up finished processes
@@ -194,9 +215,9 @@ function updateUI() {
         processList.append(placeholder);
         runSimBtn.disabled = true;
     } else {
-        loadCurrentProcessState();
         runSimBtn.disabled = false;
     }
+    loadCurrentProcessState();
 }
 
 function createMemoryBlocks() {
@@ -277,7 +298,7 @@ function createRandomProcesses() {
 
 function reset() {
     activeProcessesElem.innerHTML = "";
-    cycleCount.innerHTML = 0;
+    cycleCountElem.innerHTML = 0;
     processList.innerHTML = "";
     currentProcess.innerHTML = "<div>Not running...</div>";
     memoryState.innerHTML = "<div>Not running...</div>";
@@ -287,9 +308,8 @@ function reset() {
 }
 
 function incrementCycleCount() {
-    let count = parseInt(cycleCount.innerHTML);
-    count += 1;
-    cycleCount.innerHTML = count;
+    cycleCount += 1;
+    cycleCountElem.innerHTML = cycleCount;
 }
 
 function isActive(process) {
