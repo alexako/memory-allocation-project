@@ -85,7 +85,7 @@ function firstFit(process) {
         process.element.style = "color: green; font-weight: 700";
 
         // Iterate memory blocks
-        Object.keys(memoryBlocks).some((memId, memIndex) => {
+        Object.keys(memoryBlocks).some((memId) => {
             const memoryBlock = memoryBlocks[memId];
             if (process.size <= memoryBlock.size
                 && memoryBlock.processes.length === 0) {
@@ -110,7 +110,6 @@ function firstFit(process) {
             else {
                 process.element.style = "color: red;";
                 memoryBlock.processes = memoryBlock.processes.filter((proc) => { return proc.life > 0; });
-                console.log(memId, memoryBlock.processes);
                 //TODO: Return process to queue 
             }
             memoryBlock.element.style.border = "1px solid black";
@@ -131,16 +130,15 @@ function worstFit() {
 }
 
 function loadCurrentProcessState() {
-    currentProcess.innerHTML = "";
-    console.log("update current process window");
+    currentProcess.innerHTML = Object.keys(activeProcesses).length === 0 ? "<div>Click run to start</div>" : "";
     for (let entry in currentProcessWindow) {
         let process = currentProcessWindow[entry][0];
         let memoryBlock = currentProcessWindow[entry][1];
         let procedure = document.createElement("div");
-        procedure.setAttribute("id", "c" + procedure.pid);
+        procedure.setAttribute("id", "c" + process.pid);
         procedure.innerHTML = "PID: " + process.pid.split("-")[1]
             + " => Mem Addr: " + memoryBlock.memId.split("-")[1]
-            + " Life: " + process.life;
+            + " Cycles: " + process.life;
         currentProcess.append(procedure);
     }
 }
@@ -192,7 +190,7 @@ function updateUI() {
     if (Object.keys(processes).length === 0) {
         processList.innerHTML = "";
         let placeholder = document.createElement("div");
-        placeholder.innerHTML = "No processes...";
+        placeholder.innerHTML = "<div>No processes...</div>";
         processList.append(placeholder);
         runSimBtn.disabled = true;
     } else {
@@ -247,12 +245,12 @@ function createRandomProcesses() {
     for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
         const pid = "pid-" + (i+1);
         const procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
-        const life = Math.round(getRandomInRange(1, 4)); // Number of cycles needed to complete
+        const life = Math.round(getRandomInRange(2, 5)); // Number of cycles needed to complete
 
         // List element
         const processElem = document.createElement("div");
         processElem.setAttribute("id", pid);
-        processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB - " + life;
+        processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB <br/>" + life + " cycles";
 
         // Memory Element
         const processEl = document.createElement("div");
@@ -281,8 +279,8 @@ function reset() {
     activeProcessesElem.innerHTML = "";
     cycleCount.innerHTML = 0;
     processList.innerHTML = "";
-    currentProcess.innerHTML = "Not running...";
-    memoryState.innerHTML = "Not running ...";
+    currentProcess.innerHTML = "<div>Not running...</div>";
+    memoryState.innerHTML = "<div>Not running...</div>";
     memoryBlocks = {};
     processes = {};
     createMemoryBlocks();
