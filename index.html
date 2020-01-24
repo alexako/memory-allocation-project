@@ -35,10 +35,18 @@
                 Run
               </div>
       
+              <div id="next-frame-btn"
+                   class="controls__run-sim"
+                   onclick="frame()">
+                <i class="fas fa-play"></i>
+                Next
+              </div>
+      
               <div class="controls__algorithms">
                 <i class="fas fa-calculator"></i>
                 <select name="algorithms"
-                        id="algorithms">
+                        id="algorithms"
+                        onChange="reset()">
                   <option value="first-fit">First-fit</option>
                   <option value="best-fit">Best-fit</option>
                   <option value="worst-fit">Worst-fit</option>
@@ -76,9 +84,8 @@
                 Fixed
               </div>
       
-              <div class="controls__compaction">Compaction</div>
-      
-              <div class="controls__coalescing">Coalescing</div>
+<!--               <div class="controls__compaction">Compaction</div>
+              <div class="controls__coalescing">Coalescing</div> -->
             </div> <!-- END controls -->
           </div>
         
@@ -109,8 +116,8 @@
                     </span> Processes
                   </div>
                 </div>
-                <ul id="active-processes">
-                </ul>
+                <div id="active-processes">
+                </div>
               </div>
             </div>
             

@@ -93,7 +93,7 @@ body {
       border-radius: 0.15em;
       margin: 2em;
       margin-bottom: 3em;
-      max-height: 300px;
+      overflow: auto;
       
       div {
         padding: 0.2em 0.5em;
@@ -126,12 +126,17 @@ body {
     
     #active-processes {
       flex: 1;
-      padding: 0.75em;
       margin: 1em 0 0 0;
       text-decoration: none;
       list-style: none;
       color: $grey;
       background-color: white;
+      div {
+        padding: 0.2em 0.5em;
+        &:nth-child(even) {
+          background-color: rgba(173, 216, 230, 0.24);
+        }
+      }
     }
   }
   
@@ -161,8 +166,13 @@ body {
   #current-process-info {
     color: $grey;
     background-color: white;
-    padding: 0.75em;
     margin-top: 1em;
+    div {
+      padding: 0.2em 0.5em;
+      &:nth-child(even) {
+        background-color: rgba(173, 216, 230, 0.24);
+      }
+    }
   }
   
   #status {
@@ -198,7 +208,7 @@ body {
       display: flex;
       justify-content: space-between;
       
-      .state-container { min-width: 156px; }
+      .state-container { display: none; min-width: 156px; }
     }
   }
   
@@ -213,7 +223,6 @@ body {
 }
 
 .memory-block {
-  height: 50%;
   font-weight: 700;
   color: white;
   border: 1px solid black;
@@ -223,9 +232,11 @@ body {
   flex-direction: column;
 
   &--process {
-      .label { display: none; }
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
-  
+
   &--unallocated {
     background-color: #758184;
     justify-content: center;
