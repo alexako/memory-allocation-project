@@ -297,6 +297,7 @@ function createRandomProcesses() {
 }
 
 function reset() {
+    activeMemory.innerHTML = "";
     activeProcessesElem.innerHTML = "";
     cycleCountElem.innerHTML = 0;
     processList.innerHTML = "";
