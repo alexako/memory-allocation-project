@@ -53,8 +53,6 @@ function loadProcess(process) {
 
     if (isActive(process)) { return; }
 
-    console.log("loading:", process.pid);
-
     // TODO: Get selected algo then imp in switch
     firstFit(process);
     bestFit();
@@ -62,19 +60,15 @@ function loadProcess(process) {
 }
 
 function killProcess(process) {
-    console.group();
-    console.log("killing process:", process.pid, currentProcessWindow);
-
     process.element.remove();
     process.block.remove();
     activeProcesses = activeProcesses.filter((proc) => { return proc.pid !== process.pid; });
     currentProcessWindow = currentProcessWindow.filter((proc) => { return proc[0].pid !== process.pid; });
     delete processes[process.pid];
 
-    console.log("processes:", processes);
-    console.log("activeProcesses:", activeProcesses);
-    console.log("currentProcessWindow:", currentProcessWindow);
-    console.groupEnd();
+    Object.keys(memoryBlocks).forEach((memId) => {
+        cleaupMemory(memoryBlocks[memId]);
+    });
 }
 
 // TODO: Add time cycle property to process
@@ -90,7 +84,6 @@ function firstFit(process) {
         // Iterate memory blocks
         Object.keys(memoryBlocks).some((memId) => {
             const memoryBlock = memoryBlocks[memId];
-            console.log(memId, memoryBlock);
             if (process.size <= memoryBlock.size
                 && memoryBlock.processes.length === 0) {
                 
@@ -116,10 +109,9 @@ function firstFit(process) {
                 if (memoryBlock.processes.length > 0) {
                     if (memoryBlock.processes[0].life <= 0) {
                         memoryBlock.processes = [];
-                        memoryBlock.element.style.justifyContent = "center";
-                        memoryBlock.element.innerHTML = "Unallocated - " + memoryBlock.size + "kB";
                     }
-                }
+                } 
+                cleaupMemory(memoryBlock);
                 //TODO: Return process to queue 
             }
             memoryBlock.element.style.border = "1px solid black";
@@ -167,7 +159,7 @@ function runSim() {
   
     currentProcess.innerHTML = "";
     const numOfProcesses = Object.keys(processes).length;
-    const framerate = numOfProcesses * animationDelay;
+    const framerate = animationDelay;
 
     for (let pid in processes) {
         queueProcess(processes[pid].element);
@@ -177,7 +169,7 @@ function runSim() {
 
     const interval = setInterval(() => {
         frame();
-        if (numOfProcesses <= 0) { clearInterval(interval); }
+        if (Object.entries(processes).length <= 0) { clearInterval(interval); }
     }, framerate);
   
     runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
@@ -197,10 +189,11 @@ function frame() {
 
     // Clean up processes in memory
     for (let memId in memoryBlocks) {
-        let mBlock = memoryBlocks[memId];
-        for (let process in mBlock.processes) {
+        let memoryBlock = memoryBlocks[memId];
+        for (let process in memoryBlock.processes) {
             if (typeof(process) !== 'undefined' && process.life <= 0) { killProcess(process); }
         }
+        cleaupMemory(memoryBlock);
     }
 
     incrementCycleCount();
@@ -294,6 +287,15 @@ function createRandomProcesses() {
     }
     
     updateUI();
+}
+
+function cleaupMemory(memoryBlock) {
+    if (memoryBlock.processes.length > 0) { return; }
+    memoryBlock.element.innerHTML = "";
+    memoryBlock.element.style.justifyContent = "center";
+    let unallocated = document.createElement("span");
+    unallocated.innerHTML = "<span class=\"label\">Unallocated - " + memoryBlock.size + "kB</span>";
+    memoryBlock.element.append(unallocated);
 }
 
 function reset() {
