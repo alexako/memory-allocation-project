@@ -31,13 +31,16 @@ window.simProcess = 0;
 const animationDelay = 1000;
 
 let blockColors = [
-  "#ffb4ac",
-  "#679186",
-  "#264e70",
-  "#ffebd3",
-  "#ebedc8",
-  "#9ab5c1",
-  "#3c9099"
+    "#A0332F",
+    "#CB7B42",
+    "#DCBF53",
+    "#93A864",
+    "#5E89A8",
+    "#524A66",
+    "#679186",
+    "#264e70",
+    "#9ab5c1",
+    "#3c9099"
 ];
 
 function addProcess(process) {
@@ -129,8 +132,8 @@ function firstFit(process) {
         });
     // END iterate memory blocks
     
-    // }, processDelay);
-    }, 0);
+    }, processDelay);
+    // }, 0);
 
 }
 
@@ -186,6 +189,7 @@ function runSim() {
 }
 
 function frame() {
+    // Load each process unless already active
     for (let pid in processes) {
         if (isActive(processes[pid])) { processes[pid].life -= 1; }
         loadProcess(processes[pid]);
