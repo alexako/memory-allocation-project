@@ -6,10 +6,8 @@ let memoryState = document.getElementById("state");
 let cycleCountElem = document.getElementById("cycle-count");
 let cycleCount = parseInt(cycleCountElem.innerHTML);
 
-
 // Dictionary of all process elements
-let processes = {};
-let orderedProcesses = [];
+let processes = [];
 
 // List of active processes (loaded into memory)
 let activeProcesses = [];
@@ -20,8 +18,8 @@ let currentProcessWindow = [];
 // Far left window
 let processQueue = [];
 
-// Dictionary of all memory blocks
-let memoryBlocks = {};
+// List of all memory blocks
+let memoryBlocks = [];
 
 let runSimBtn = document.getElementById("run-sim-btn");
 let simRunning = false;
@@ -57,92 +55,129 @@ function loadProcess(process) {
 
     if (isActive(process)) { return; }
 
-    console.log("Loading", process.pid);
+    const algorithms = document.getElementById("algorithms");
+    const selectedAlgo = algorithms.options[algorithms.selectedIndex].value;
 
-    // TODO: Get selected algo then imp in switch
-    firstFit(process);
-    bestFit();
-    worstFit();
+    const algos = {
+        "first-fit": firstFit,
+        "best-fit": bestFit,
+        "worst-fit": worstFit
+    };
+
+    algos[selectedAlgo](process);
+}
+
+// Place process into memory block
+function allocate(process, memoryBlock) {
+    console.log("Loading", process.pid, "into",  memoryBlock.memId);
+
+    memoryBlock.element.style.border = "3px solid green";
+
+    // Create process block element to be loaded into this memory block
+    process.block.style.height = (process.size/memoryBlock.size) * 100 + "%";
+    let memBlockElem = document.getElementById(memoryBlock.memId);
+    memBlockElem.innerHTML = "";
+
+    memBlockElem.style.justifyContent = "start";
+    memBlockElem.append(process.block);
+
+    // Display remaining memory after allocation
+    let remaining = document.createElement("span");
+    remaining.classList.add("label");
+    remaining.innerHTML = memoryBlock.memId + ": "
+        + (memoryBlock.size - process.size) + "kB remaining";
+
+    memBlockElem.append(remaining);
+    memoryBlock.processes.push(process);
+    activeProcesses.push(process);
+    currentProcessWindow.push([process, memoryBlock]);
+
+    // Remove from active processes window
+    process.element.remove();
 }
 
 function killProcess(process) {
     process.element.remove();
     process.block.remove();
-    activeProcesses = activeProcesses.filter((proc) => { return proc.pid !== process.pid; });
-    currentProcessWindow = currentProcessWindow.filter((proc) => { return proc[0].pid !== process.pid; });
-    delete processes[process.pid];
+    activeProcesses = activeProcesses.filter((proc) => proc.pid !== process.pid);
+    currentProcessWindow = currentProcessWindow.filter((proc) => proc[0].pid !== process.pid);
+    processes = processes.filter((proc) => proc.pid !== process.pid);
 }
 
 function firstFit(process) {
     memoryState.classList.remove("inactive");
 
     const processIndex = parseInt(process.pid.slice(-1));
-    const numOfBlocks = Object.keys(memoryBlocks).length;
     const processDelay = processIndex * animationDelay;
     setTimeout(() => { // 1 second per process
         process.element.style = "color: green; font-weight: 700";
 
         // Iterate memory blocks
-        Object.keys(memoryBlocks).some((memId) => {
-            const memoryBlock = memoryBlocks[memId];
-            if (process.size <= memoryBlock.size
-                && memoryBlock.processes.length === 0) {
-                
-                memoryBlock.element.style.border = "3px solid green";
-
-                // Create process block element to be loaded into this memory block
-                process.block.style.height = (process.size/memoryBlock.size) * 100 + "%";
-                let memBlockElem = document.getElementById(memoryBlock.memId);
-                memBlockElem.innerHTML = "";
-
-                memBlockElem.style.justifyContent = "start";
-                memBlockElem.append(process.block);
-
-                // Display remaining memory after allocation
-                let remaining = document.createElement("span");
-                remaining.classList.add("label");
-                remaining.innerHTML = memoryBlock.memId + ": "
-                    + (memoryBlock.size - process.size) + "kB remaining";
-
-                memBlockElem.append(remaining);
-                memoryBlock.processes.push(process);
-                activeProcesses.push(process);
-                currentProcessWindow.push([process, memoryBlock]);
-
-                // Remove from active processes window
-                process.element.remove();
-
-                console.log("PUSHED ", process.pid, "to", memId, memoryBlock);
-
-                return true; // Exit memory block loop; load next process
-            }
-
-            else {
+        memoryBlocks.some((memoryBlock) => {
+            if (memoryBlock.processes.length > 0) {
                 process.element.style = "color: red;";
-                if (memoryBlock.processes.length > 0) {
-                    if (memoryBlock.processes[0].life <= 0) {
-                        memoryBlock.processes = [];
-                        cleanupMemory(memoryBlock);
-                    }
-                } 
-                //TODO: Return process to queue 
-            }
+                if (memoryBlock.processes[0].life <= 0) {
+                    memoryBlock.processes = [];
+                    cleanupMemory(memoryBlock);
+                }
+            } else {
+
+                if (process.size <= memoryBlock.size // process fits into memory block
+                    && memoryBlock.processes.length === 0) { // and no other processes are in memory block
+                    
+                    allocate(process, memoryBlock);
+
+                    return true; // Exit memory block loop; load next process
+                }
+            } 
+
             memoryBlock.element.style.border = "1px solid black";
             loadCurrentProcessState();
         });
     // END iterate memory blocks
     
-    }, processDelay);
-    // }, 0);
+    // }, processDelay);
+    }, 0);
 
 }
 
-function bestFit() {
+function bestFit(process) {
+    const processIndex = parseInt(process.pid.slice(-1));
+    const processDelay = processIndex * animationDelay;
+    setTimeout(() => { // 1 second per process
+        process.element.style = "color: green; font-weight: 700";
 
+        let leastRemaining = 99999;
+        let bestFitBlock = memoryBlocks[0];
+
+        // Iterate memory blocks
+        memoryBlocks.forEach((memoryBlock) => {
+
+            if (memoryBlock.processes.length > 0) {
+                process.element.style = "color: red;";
+                if (memoryBlock.processes[0].life <= 0) {
+                    memoryBlock.processes = [];
+                    cleanupMemory(memoryBlock);
+                }
+            } else {
+                let remaining = memoryBlock.size - process.size;
+                if (remaining >= 0
+                    && remaining < leastRemaining) {
+                    leastRemaining = remaining;
+                    bestFitBlock = memoryBlock;
+                }
+                memoryBlock.element.style.border = "1px solid black";
+                loadCurrentProcessState();
+            }
+        });
+        if (leastRemaining < 99999) { allocate(process, bestFitBlock); }
+
+    // }, processDelay);
+    }, 0);
 }
 
-function worstFit() {
-
+function worstFit(process) {
+    console.log("worst-fit");
 }
 
 function loadCurrentProcessState() {
@@ -160,7 +195,7 @@ function loadCurrentProcessState() {
         currentProcess.append(procedure);
     }
 
-    if (Object.entries(processes).length === 0 && cycleCount > 0) { 
+    if (processes.length === 0 && cycleCount > 0) { 
         currentProcess.innerHTML = "";
         let state = document.createElement("div");
         state.innerHTML = "<div>All processes completed!</div>";
@@ -171,12 +206,13 @@ function loadCurrentProcessState() {
 function runSim() {
   
     currentProcess.innerHTML = "";
-    const numOfProcesses = Object.keys(processes).length;
+    const numOfProcesses = processes.length;
     const framerate = animationDelay;
 
-    for (let pid in processes) {
-        queueProcess(processes[pid].element);
-    }
+    // Queue processes
+    processes.forEach((process) => {
+        queueProcess(process.element);
+    })
 
     frame();
 
@@ -190,31 +226,29 @@ function runSim() {
 
 function frame() {
     // Load each process unless already active
-    for (let pid in processes) {
-        if (isActive(processes[pid])) { processes[pid].life -= 1; }
-        loadProcess(processes[pid]);
-    }
+    processes.forEach((process) => {
+        if (isActive(process)) { process.life -= 1; }
+        loadProcess(process);
+    });
 
     // Clean up finished processes
-    for (let i in processes) {
-        let process = processes[i];
+    processes.forEach((process) => {
         if (typeof(process) !== 'undefined' && process.life <= 0) { killProcess(process); }
-    }
+    });
 
     // Clean up processes in memory
-    for (let memId in memoryBlocks) {
-        let memoryBlock = memoryBlocks[memId];
-        if (memoryBlock.processes.length <= 0 || Object.keys(processes).length === 0) {
+    memoryBlocks.forEach((memoryBlock) => {
+        if (memoryBlock.processes.length <= 0 || processes.length === 0) {
             cleanupMemory(memoryBlock);
         }
-    }
+    })
 
     incrementCycleCount();
     updateUI();
 }
 
 function updateUI() {
-    if (Object.keys(processes).length === 0) {
+    if (processes.length === 0) {
         processList.innerHTML = "";
         let placeholder = document.createElement("div");
         placeholder.innerHTML = "<div>No processes...</div>";
@@ -253,7 +287,7 @@ function createMemoryBlocks() {
             "element": blockEl
         }
 
-        memoryBlocks[memId] = memoryBlock;
+        memoryBlocks.push(memoryBlock);
     }
 }
 
@@ -262,12 +296,12 @@ function createRandomProcesses() {
     const e = document.getElementById("num-of-blocks");
     const totalMem = parseInt(el.options[el.selectedIndex].value);
     const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
-    const processCount = Object.keys(processes).length;
+    const processCount = processes.length;
 
     // Load existing processes
-    for (let pid in processes) {
-        addProcess(processes[pid].element);
-    }
+    processes.forEach((process) => {
+        addProcess(process.element);
+    });
 
     for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
         const pid = "pid-" + (i+1);
@@ -296,7 +330,7 @@ function createRandomProcesses() {
             "element": processElem, // Process list element in queues
             "block": processEl // Process block element in active memory
         }
-        processes[process.pid] = process;
+        processes.push(process);
     }
     
     updateUI();
@@ -319,8 +353,8 @@ function reset() {
     processList.innerHTML = "";
     currentProcess.innerHTML = "<div>Not running...</div>";
     memoryState.innerHTML = "<div>Not running...</div>";
-    memoryBlocks = {};
-    processes = {};
+    memoryBlocks = [];
+    processes = [];
     createMemoryBlocks();
 }
 
