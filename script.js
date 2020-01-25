@@ -177,7 +177,38 @@ function bestFit(process) {
 }
 
 function worstFit(process) {
-    console.log("worst-fit");
+    const processIndex = parseInt(process.pid.slice(-1));
+    const processDelay = processIndex * animationDelay;
+    setTimeout(() => { // 1 second per process
+        process.element.style = "color: green; font-weight: 700";
+
+        let mostRemaining = -1;
+        let worstFitBlock = memoryBlocks[0];
+
+        // Iterate memory blocks
+        memoryBlocks.forEach((memoryBlock) => {
+
+            if (memoryBlock.processes.length > 0) {
+                process.element.style = "color: red;";
+                if (memoryBlock.processes[0].life <= 0) {
+                    memoryBlock.processes = [];
+                    cleanupMemory(memoryBlock);
+                }
+            } else {
+                let remaining = memoryBlock.size - process.size;
+                if (remaining >= 0
+                    && remaining > mostRemaining) {
+                    mostRemaining = remaining;
+                    worstFitBlock = memoryBlock;
+                }
+                memoryBlock.element.style.border = "1px solid black";
+                loadCurrentProcessState();
+            }
+        });
+        if (mostRemaining > -1) { allocate(process, worstFitBlock); }
+
+    // }, processDelay);
+    }, 0);
 }
 
 function loadCurrentProcessState() {
