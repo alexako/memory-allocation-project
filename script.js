@@ -89,7 +89,6 @@ function killProcess(process) {
     process.element.remove(); // Remove from Active process list
     process.block.remove(); // Remove from memory block
     activeProcesses = activeProcesses.filter((proc) => proc.pid !== process.pid);
-    // processes = processes.filter((proc) => proc.pid !== process.pid);
 }
 
 // Load process into memory block via algorithms (First fit, Best fit, Worst fit)
