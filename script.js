@@ -6,11 +6,15 @@ let memoryState = document.getElementById("state");
 let cycleCountElem = document.getElementById("cycle-count");
 let cycleCount = parseInt(cycleCountElem.innerHTML);
 
-// Dictionary of all process elements
+// List of all process elements
+let processIndex = 0;
 let processes = [];
 
 // List of active processes (loaded into memory)
 let activeProcesses = [];
+
+let waitingIndex = 0;
+let waitingProcesses = [];
 
 // List of current Processes
 let currentProcessWindow = [];
@@ -20,6 +24,7 @@ let processQueue = [];
 
 // List of all memory blocks
 let memoryBlocks = [];
+
 
 let runSimBtn = document.getElementById("run-sim-btn");
 let simRunning = false;
@@ -50,23 +55,6 @@ function queueProcess(process) {
     activeProcessesElem.appendChild(process);
 }
 
-// Load process into memory block via algorithms (First fit, Best fit, Worst fit)
-function loadProcess(process) {
-
-    if (isActive(process)) { return; }
-
-    const algorithms = document.getElementById("algorithms");
-    const selectedAlgo = algorithms.options[algorithms.selectedIndex].value;
-
-    const algos = {
-        "first-fit": firstFit,
-        "best-fit": bestFit,
-        "worst-fit": worstFit
-    };
-
-    algos[selectedAlgo](process);
-}
-
 // Place process into memory block
 function allocate(process, memoryBlock) {
     console.log("Loading", process.pid, "into",  memoryBlock.memId);
@@ -84,8 +72,8 @@ function allocate(process, memoryBlock) {
     // Display remaining memory after allocation
     let remaining = document.createElement("span");
     remaining.classList.add("label");
-    remaining.innerHTML = memoryBlock.memId + ": "
-        + (memoryBlock.size - process.size) + "kB remaining";
+    remaining.innerHTML = "Block: " + memoryBlock.memId.split("-")[1] + ": "
+        + (memoryBlock.size - process.size) + "kB fragmented";
 
     memBlockElem.append(remaining);
     memoryBlock.processes.push(process);
@@ -94,21 +82,39 @@ function allocate(process, memoryBlock) {
 
     // Remove from active processes window
     process.element.remove();
+
 }
 
 function killProcess(process) {
-    process.element.remove();
-    process.block.remove();
+    process.element.remove(); // Remove from Active process list
+    process.block.remove(); // Remove from memory block
     activeProcesses = activeProcesses.filter((proc) => proc.pid !== process.pid);
-    currentProcessWindow = currentProcessWindow.filter((proc) => proc[0].pid !== process.pid);
-    processes = processes.filter((proc) => proc.pid !== process.pid);
+    // processes = processes.filter((proc) => proc.pid !== process.pid);
+}
+
+// Load process into memory block via algorithms (First fit, Best fit, Worst fit)
+function loadProcess(process) {
+
+    const algorithms = document.getElementById("algorithms");
+    const selectedAlgo = algorithms.options[algorithms.selectedIndex].value;
+
+    const algos = {
+        "first-fit": firstFit,
+        "best-fit": bestFit,
+        "worst-fit": worstFit
+    };
+
+    algos[selectedAlgo](process);
+
+    (processes.length > processIndex)
+        ? processIndex += 1
+        : processIndex = 0;
 }
 
 function firstFit(process) {
     memoryState.classList.remove("inactive");
 
-    const processIndex = parseInt(process.pid.slice(-1));
-    const processDelay = processIndex * animationDelay;
+    // const processDelay = processIndex * animationDelay;
     setTimeout(() => { // 1 second per process
         process.element.style = "color: green; font-weight: 700";
 
@@ -136,16 +142,15 @@ function firstFit(process) {
         });
     // END iterate memory blocks
     
+        waitingProcesses.push(process);
     // }, processDelay);
     }, 0);
 
 }
 
 function bestFit(process) {
-    const processIndex = parseInt(process.pid.slice(-1));
-    const processDelay = processIndex * animationDelay;
     setTimeout(() => { // 1 second per process
-        process.element.style = "color: green; font-weight: 700";
+        if (typeof process !== "undefined") { process.element.style = "color: green; font-weight: 700"; }
 
         let leastRemaining = 99999;
         let bestFitBlock = memoryBlocks[0];
@@ -166,19 +171,18 @@ function bestFit(process) {
                     leastRemaining = remaining;
                     bestFitBlock = memoryBlock;
                 }
-                memoryBlock.element.style.border = "1px solid black";
                 loadCurrentProcessState();
             }
+            memoryBlock.element.style.border = "1px solid black";
         });
         if (leastRemaining < 99999) { allocate(process, bestFitBlock); }
+        else { waitingProcesses.push(process); }
 
     // }, processDelay);
     }, 0);
 }
 
 function worstFit(process) {
-    const processIndex = parseInt(process.pid.slice(-1));
-    const processDelay = processIndex * animationDelay;
     setTimeout(() => { // 1 second per process
         process.element.style = "color: green; font-weight: 700";
 
@@ -201,11 +205,12 @@ function worstFit(process) {
                     mostRemaining = remaining;
                     worstFitBlock = memoryBlock;
                 }
-                memoryBlock.element.style.border = "1px solid black";
                 loadCurrentProcessState();
             }
+            memoryBlock.element.style.border = "1px solid black";
         });
         if (mostRemaining > -1) { allocate(process, worstFitBlock); }
+        else { waitingProcesses.push(process); }
 
     // }, processDelay);
     }, 0);
@@ -220,16 +225,18 @@ function loadCurrentProcessState() {
         let memoryBlock = currentProcessWindow[entry][1];
         let procedure = document.createElement("div");
         procedure.setAttribute("id", "c" + process.pid);
-        procedure.innerHTML = "PID: " + process.pid.split("-")[1]
-            + " => Mem Addr: " + memoryBlock.memId.split("-")[1]
+        procedure.innerHTML = "Job: " + process.pid.split("-")[1]
+            + " - Block: " + memoryBlock.memId.split("-")[1]
             + " Cycles: " + process.life;
+        if (process.life <= 0) {
+            procedure.style = "text-decoration: line-through; opacity: 0.5; color: green;";
+        }
         currentProcess.append(procedure);
     }
 
-    if (processes.length === 0 && cycleCount > 0) { 
-        currentProcess.innerHTML = "";
+    if (activeProcesses.length === 0 && cycleCount > 1) { 
         let state = document.createElement("div");
-        state.innerHTML = "<div>All processes completed!</div>";
+        state.innerHTML = "<div style=\"font-weight: 700; text-align: center; color: green;\">All processes completed!</div>";
         currentProcess.append(state);
     }
 }
@@ -245,8 +252,6 @@ function runSim() {
         queueProcess(process.element);
     })
 
-    frame();
-
 /*     const interval = setInterval(() => {
         frame();
         if (Object.entries(processes).length <= 0) { clearInterval(interval); }
@@ -256,15 +261,29 @@ function runSim() {
 }
 
 function frame() {
-    // Load each process unless already active
+    // Process waiting first
+    if (waitingProcesses.length > 0) {
+        let waitingProcess = waitingProcesses[waitingIndex];
+        (isLive(waitingProcess))
+            ? loadProcess(waitingProcess)
+            : waitingIndex += 1;
+    } else { // Load each process unless already active
+        let process = processes[processIndex];
+        (isLive(process))
+            ? loadProcess(process)
+            : processIndex += 1;
+    }
+
     processes.forEach((process) => {
         if (isActive(process)) { process.life -= 1; }
-        loadProcess(process);
     });
 
     // Clean up finished processes
     processes.forEach((process) => {
-        if (typeof(process) !== 'undefined' && process.life <= 0) { killProcess(process); }
+        if (typeof(process) !== 'undefined' && process.life <= 0) {
+            killProcess(process);
+            // processIndex -= 1;
+        }
     });
 
     // Clean up processes in memory
@@ -272,7 +291,9 @@ function frame() {
         if (memoryBlock.processes.length <= 0 || processes.length === 0) {
             cleanupMemory(memoryBlock);
         }
-    })
+    });
+
+    console.log("procesIndex:", processIndex);
 
     incrementCycleCount();
     updateUI();
@@ -342,7 +363,7 @@ function createRandomProcesses() {
         // List element
         const processElem = document.createElement("div");
         processElem.setAttribute("id", pid);
-        processElem.innerHTML = "PID: " + (i+1) + " - " + procSize + "kB <br/>" + life + " cycles";
+        processElem.innerHTML = "Job: " + (i+1) + " - " + procSize + "kB - " + life + " cycles";
 
         // Memory Element
         const processEl = document.createElement("div");
@@ -395,12 +416,17 @@ function incrementCycleCount() {
 }
 
 function isActive(process) {
+    if (typeof process === "undefined") { return false; }
     for (let proc in activeProcesses) {
         if (activeProcesses[proc].pid === process.pid) {
             return true;
         }
     }
     return false;
+}
+
+function isLive(process) {
+    return (typeof process !== "undefined" && !isActive(process) && process.life > 0);
 }
 
 function getRandomInRange(min, max) {
