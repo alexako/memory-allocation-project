@@ -327,7 +327,7 @@ function createMemoryBlocks() {
         const blockEl = document.createElement("div");
         blockEl.setAttribute("id", memId);
         blockEl.className = "memory-block memory-block--unallocated";
-        blockEl.innerHTML = "<span class=\"label\">Unallocated - " + blockSize + "kB</span>";
+        blockEl.innerHTML = "<span class=\"label\">Block " + (i+1) + " unallocated - " + blockSize + "kB</span>";
         blockEl.style.height = Math.round((blockSize/totalMem) * 100) - 1 + "%";
         activeMemory.append(blockEl);
 
@@ -393,7 +393,8 @@ function cleanupMemory(memoryBlock) {
     memoryBlock.element.style.justifyContent = "center";
     memoryBlock.element.style.border = "none";
     let unallocated = document.createElement("span");
-    unallocated.innerHTML = "<span class=\"label\">Unallocated - " + memoryBlock.size + "kB</span>";
+    unallocated.innerHTML = "<span class=\"label\">Block " + memoryBlock.memId.split("-")[1]
+        + " unallocated - " + memoryBlock.size + "kB</span>";
     memoryBlock.element.append(unallocated);
 }
 
@@ -406,6 +407,7 @@ function reset() {
     memoryState.innerHTML = "<div>Not running...</div>";
     memoryBlocks = [];
     processes = [];
+    currentProcessWindow = [];
     createMemoryBlocks();
 }
 
