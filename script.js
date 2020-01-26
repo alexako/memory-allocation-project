@@ -15,12 +15,16 @@ let activeProcesses = [];
 // List of waiting processes
 let waitingProcesses = [];
 
+// List of current processes
+let currentProcessWindow = [];
+
 // List of all memory blocks
 let memoryBlocks = [];
 
 
 let runSimBtn = document.getElementById("run-sim-btn");
 let simRunning = false;
+let stopSim = false;
 
 const animationDelay = 1000;
 
@@ -239,15 +243,21 @@ function loadCurrentProcessState() {
 
 function runSim() {
     
-    if (simRunning) { return; }
+    if (simRunning) { stopSim = true;}
 
     if (cycleCount > 0) {
         simRunning = true;
         const framerate = animationDelay;
         const interval = setInterval(() => {
             frame();
-            if (activeProcesses.length <= 0) { clearInterval(interval); }
+            if ((activeProcesses.length === 0 && processes.length === 0)
+                || stopSim) {
+                clearInterval(interval);
+                stopSim = false;
+                simRunning = false;
+            }
         }, framerate);
+        return;
     }
   
     currentProcess.innerHTML = "";
