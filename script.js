@@ -244,29 +244,35 @@ function loadCurrentProcessState() {
 function runSim() {
     
     if (simRunning) { stopSim = true;}
+    else { stopSim = false; }
 
     if (cycleCount > 0) {
+        console.log("Starting simulation");
         simRunning = true;
         const framerate = animationDelay;
         const interval = setInterval(() => {
             frame();
-            if ((activeProcesses.length === 0 && processes.length === 0)
+            if ((processes.length === 0
+                && activeProcesses.length === 0
+                && waitingProcesses.length === 0)
                 || stopSim) {
+                console.log("Stopping simulation");
                 clearInterval(interval);
-                stopSim = false;
+                runSimBtn.innerHTML =  "<i class=\"fas fa-play\"></i> Run";
                 simRunning = false;
             }
         }, framerate);
-        return;
     }
   
-    currentProcess.innerHTML = "";
+    if (cycleCount === 0) {
+        currentProcess.innerHTML = "";
 
-    // Queue processes
-    processes.forEach((process) => {
-        queueProcess(process.element);
-    })
-  
+        // Queue processes
+        processes.forEach((process) => {
+            queueProcess(process.element);
+        });
+    }
+
     runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
 }
 
@@ -430,6 +436,8 @@ function reset() {
     activeProcesses = [];
     waitingProcesses = [];
     currentProcessWindow = [];
+    stopSim = false;
+    simRunning = false;
     createMemoryBlocks();
 }
 
