@@ -7,20 +7,13 @@ let cycleCountElem = document.getElementById("cycle-count");
 let cycleCount = parseInt(cycleCountElem.innerHTML);
 
 // List of all process elements
-let processIndex = 0;
 let processes = [];
 
 // List of active processes (loaded into memory)
 let activeProcesses = [];
 
-let waitingIndex = 0;
+// List of waiting processes
 let waitingProcesses = [];
-
-// List of current Processes
-let currentProcessWindow = [];
-
-// Far left window
-let processQueue = [];
 
 // List of all memory blocks
 let memoryBlocks = [];
@@ -28,8 +21,6 @@ let memoryBlocks = [];
 
 let runSimBtn = document.getElementById("run-sim-btn");
 let simRunning = false;
-
-window.simProcess = 0;
 
 const animationDelay = 1000;
 
@@ -75,14 +66,21 @@ function allocate(process, memoryBlock) {
     remaining.innerHTML = "Block: " + memoryBlock.memId.split("-")[1] + ": "
         + (memoryBlock.size - process.size) + "kB fragmented";
 
+    // Resize or hide block label depending on size of remaining space 
+    if (((process.size/memoryBlock.size)*100) > 85) {
+        remaining.style.fontSize = "0.75em";
+        if (((process.size/memoryBlock.size)*100) > 95) {
+            remaining.style.opacity = 0;
+        }
+    }
+
     memBlockElem.append(remaining);
     memoryBlock.processes.push(process);
     activeProcesses.push(process);
     currentProcessWindow.push([process, memoryBlock]);
 
-    // Remove from active processes window
+    // Remove from queued processes window
     process.element.remove();
-
 }
 
 function killProcess(process) {
@@ -104,115 +102,114 @@ function loadProcess(process) {
     };
 
     algos[selectedAlgo](process);
-
-    (processes.length > processIndex)
-        ? processIndex += 1
-        : processIndex = 0;
 }
 
 function firstFit(process) {
     memoryState.classList.remove("inactive");
+    let isAllocated = false;
+    process.element.style = "color: green; font-weight: 700";
 
-    // const processDelay = processIndex * animationDelay;
-    setTimeout(() => { // 1 second per process
-        process.element.style = "color: green; font-weight: 700";
+    // Iterate memory blocks
+    memoryBlocks.some((memoryBlock) => {
+        if (memoryBlock.processes.length > 0) { // Block is occupied
+            process.element.style = "color: red;";
+        } else {
+            if (process.size <= memoryBlock.size) {// process fits into memory block
+                allocate(process, memoryBlock);
+                isAllocated = true;
+                return true; // Exit memory block loop; load next process
+            }
+        } 
 
-        // Iterate memory blocks
-        memoryBlocks.some((memoryBlock) => {
-            if (memoryBlock.processes.length > 0) {
-                process.element.style = "color: red;";
-                if (memoryBlock.processes[0].life <= 0) {
-                    memoryBlock.processes = [];
-                    cleanupMemory(memoryBlock);
-                }
-            } else {
-
-                if (process.size <= memoryBlock.size // process fits into memory block
-                    && memoryBlock.processes.length === 0) { // and no other processes are in memory block
-                    
-                    allocate(process, memoryBlock);
-
-                    return true; // Exit memory block loop; load next process
-                }
-            } 
-
-            memoryBlock.element.style.border = "1px solid black";
-            loadCurrentProcessState();
-        });
+        memoryBlock.element.style.border = "1px solid black";
+        loadCurrentProcessState();
+    });
     // END iterate memory blocks
     
+    if (!isAllocated) {
+        console.log(process.pid, "is waiting");
         waitingProcesses.push(process);
-    // }, processDelay);
-    }, 0);
-
+    }
 }
 
 function bestFit(process) {
-    setTimeout(() => { // 1 second per process
-        if (typeof process !== "undefined") { process.element.style = "color: green; font-weight: 700"; }
+    if (typeof process !== "undefined") { process.element.style = "color: green; font-weight: 700"; }
 
-        let leastRemaining = 99999;
-        let bestFitBlock = memoryBlocks[0];
+    let isAllocated = false;
+    let leastRemaining = 99999;
+    let bestFitBlock = memoryBlocks[0];
 
-        // Iterate memory blocks
-        memoryBlocks.forEach((memoryBlock) => {
+    // Iterate memory blocks
+    memoryBlocks.forEach((memoryBlock) => {
 
-            if (memoryBlock.processes.length > 0) {
-                process.element.style = "color: red;";
-                if (memoryBlock.processes[0].life <= 0) {
-                    memoryBlock.processes = [];
-                    cleanupMemory(memoryBlock);
-                }
-            } else {
-                let remaining = memoryBlock.size - process.size;
-                if (remaining >= 0
-                    && remaining < leastRemaining) {
-                    leastRemaining = remaining;
-                    bestFitBlock = memoryBlock;
-                }
-                loadCurrentProcessState();
+        if (memoryBlock.processes.length > 0) {
+            process.element.style = "color: red;";
+            if (memoryBlock.processes[0].life <= 0) {
+                memoryBlock.processes = [];
+                cleanupMemory(memoryBlock);
             }
-            memoryBlock.element.style.border = "1px solid black";
-        });
-        if (leastRemaining < 99999) { allocate(process, bestFitBlock); }
-        else { waitingProcesses.push(process); }
+        } else {
+            let remaining = memoryBlock.size - process.size;
+            if (remaining >= 0
+                && remaining < leastRemaining) {
+                leastRemaining = remaining;
+                bestFitBlock = memoryBlock;
+            }
+            loadCurrentProcessState();
+        }
+        memoryBlock.element.style.border = "1px solid black";
+    });
+    // END iterate memory blocks
 
-    // }, processDelay);
-    }, 0);
+    if (leastRemaining < 99999) {
+        allocate(process, bestFitBlock);
+        isAllocated = true;
+    }
+
+    if (!isAllocated) {
+        console.log(process.pid, "is waiting");
+        waitingProcesses.push(process);
+    }
 }
 
 function worstFit(process) {
-    setTimeout(() => { // 1 second per process
-        process.element.style = "color: green; font-weight: 700";
+    process.element.style = "color: green; font-weight: 700";
 
-        let mostRemaining = -1;
-        let worstFitBlock = memoryBlocks[0];
+    let mostRemaining = -1;
+    let worstFitBlock = memoryBlocks[0];
+    let isAllocated = false;
 
-        // Iterate memory blocks
-        memoryBlocks.forEach((memoryBlock) => {
+    // Iterate memory blocks
+    memoryBlocks.forEach((memoryBlock) => {
 
-            if (memoryBlock.processes.length > 0) {
-                process.element.style = "color: red;";
-                if (memoryBlock.processes[0].life <= 0) {
-                    memoryBlock.processes = [];
-                    cleanupMemory(memoryBlock);
-                }
-            } else {
-                let remaining = memoryBlock.size - process.size;
-                if (remaining >= 0
-                    && remaining > mostRemaining) {
-                    mostRemaining = remaining;
-                    worstFitBlock = memoryBlock;
-                }
-                loadCurrentProcessState();
+        if (memoryBlock.processes.length > 0) {
+            process.element.style = "color: red;";
+            if (memoryBlock.processes[0].life <= 0) {
+                memoryBlock.processes = [];
+                cleanupMemory(memoryBlock);
             }
-            memoryBlock.element.style.border = "1px solid black";
-        });
-        if (mostRemaining > -1) { allocate(process, worstFitBlock); }
-        else { waitingProcesses.push(process); }
+        } else {
+            let remaining = memoryBlock.size - process.size;
+            if (remaining >= 0
+                && remaining > mostRemaining) {
+                mostRemaining = remaining;
+                worstFitBlock = memoryBlock;
+            }
+            loadCurrentProcessState();
+        }
+        memoryBlock.element.style.border = "1px solid black";
+    });
+    // END iterate memory blocks
 
-    // }, processDelay);
-    }, 0);
+    if (mostRemaining > -1) {
+        allocate(process, worstFitBlock);
+        isAllocated = true;
+    }
+
+    if (!isAllocated) {
+        console.log(process.pid, "is waiting");
+        waitingProcesses.push(process);
+    }
 }
 
 function loadCurrentProcessState() {
@@ -233,7 +230,7 @@ function loadCurrentProcessState() {
         currentProcess.append(procedure);
     }
 
-    if (activeProcesses.length === 0 && cycleCount > 1) { 
+    if (activeProcesses.length === 0 && waitingProcesses.length === 0 && cycleCount > 1) { 
         let state = document.createElement("div");
         state.innerHTML = "<div style=\"font-weight: 700; text-align: center; color: green;\">All processes completed!</div>";
         currentProcess.append(state);
@@ -241,58 +238,70 @@ function loadCurrentProcessState() {
 }
 
 function runSim() {
+    
+    if (simRunning) { return; }
+
+    if (cycleCount > 0) {
+        simRunning = true;
+        const framerate = animationDelay;
+        const interval = setInterval(() => {
+            frame();
+            if (activeProcesses.length <= 0) { clearInterval(interval); }
+        }, framerate);
+    }
   
     currentProcess.innerHTML = "";
-    const numOfProcesses = processes.length;
-    const framerate = animationDelay;
 
     // Queue processes
     processes.forEach((process) => {
         queueProcess(process.element);
     })
-
-/*     const interval = setInterval(() => {
-        frame();
-        if (Object.entries(processes).length <= 0) { clearInterval(interval); }
-    }, framerate); */
   
     runSimBtn.innerHTML = simRunning ? "<i class=\"fas fa-pause\"></i> Stop" : "<i class=\"fas fa-play\"></i> Run";
 }
 
 function frame() {
+
+    if (processes.length === 0
+        && activeProcesses.length === 0
+        && waitingProcesses.length === 0) { return; }
+
+    activeProcesses.forEach((process) => { process.life -= 1; });
+
     // Process waiting first
     if (waitingProcesses.length > 0) {
-        let waitingProcess = waitingProcesses[waitingIndex];
-        (isLive(waitingProcess))
-            ? loadProcess(waitingProcess)
-            : waitingIndex += 1;
-    } else { // Load each process unless already active
-        let process = processes[processIndex];
-        (isLive(process))
-            ? loadProcess(process)
-            : processIndex += 1;
+        let waitingProcess = waitingProcesses.shift();
+        console.log("Loading waiting process:", waitingProcess);
+        if (isLive(waitingProcess)) {
+            loadProcess(waitingProcess)
+        }
+    } else { // Load process unless already active
+        let process = processes.shift();
+        console.log("Loading process:", process);
+        if (isLive(process)) {
+            loadProcess(process);
+        }
     }
 
-    processes.forEach((process) => {
-        if (isActive(process)) { process.life -= 1; }
-    });
-
     // Clean up finished processes
-    processes.forEach((process) => {
+    activeProcesses.forEach((process) => {
         if (typeof(process) !== 'undefined' && process.life <= 0) {
+            console.log("Killing ", process);
             killProcess(process);
-            // processIndex -= 1;
         }
     });
 
     // Clean up processes in memory
     memoryBlocks.forEach((memoryBlock) => {
-        if (memoryBlock.processes.length <= 0 || processes.length === 0) {
+        if (memoryBlock.processes.length <= 0 || activeProcesses.length === 0) {
+            console.log("cleaning", memoryBlock);
+            cleanupMemory(memoryBlock);
+        }
+
+        if (memoryBlock.processes.length > 0 && memoryBlock.processes[0].life <= 0) {
             cleanupMemory(memoryBlock);
         }
     });
-
-    console.log("procesIndex:", processIndex);
 
     incrementCycleCount();
     updateUI();
@@ -357,7 +366,7 @@ function createRandomProcesses() {
     for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
         const pid = "pid-" + (i+1);
         const procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
-        const life = Math.round(getRandomInRange(2, 5)); // Number of cycles needed to complete
+        const life = Math.round(getRandomInRange(4, 10)); // Number of cycles needed to complete
 
         // List element
         const processElem = document.createElement("div");
@@ -402,11 +411,14 @@ function reset() {
     activeMemory.innerHTML = "";
     activeProcessesElem.innerHTML = "";
     cycleCountElem.innerHTML = 0;
+    cycleCount = 0;
     processList.innerHTML = "";
     currentProcess.innerHTML = "<div>Not running...</div>";
     memoryState.innerHTML = "<div>Not running...</div>";
     memoryBlocks = [];
     processes = [];
+    activeProcesses = [];
+    waitingProcesses = [];
     currentProcessWindow = [];
     createMemoryBlocks();
 }
