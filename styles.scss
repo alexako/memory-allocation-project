@@ -1,6 +1,10 @@
 $grey: #333642;
-$mint-green: #4e9d84;
+$grey-hover: #4d5162;
 $light-grey: #444857;
+$mint-green: #4e9d84;
+$mint-green-hover: #5bbd9e;
+$blue: #4c719f;
+$blue-hover: #5b86bd;
 $yellow: #ffdd40; 
 
 body {
@@ -13,6 +17,24 @@ body {
 .active { color: highlight-yellow; }
 .inactive { color: red; }
 .active-btn { border-bottom: 3px solid $yellow; }
+
+.button {
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  padding: 1em;
+  background-color: $blue;
+  cursor: pointer;
+  &:hover {
+    background-color: $blue-hover;
+  }
+  &--create {
+    background-color: $mint-green;
+    &:hover {
+      background-color: $mint-green-hover;
+    }
+  }
+}
 
 .state-indicator { padding: 0.5em; }
 
@@ -261,7 +283,7 @@ body {
   .modal-header {
     display: flex;
     justify-content: space-between;
-    background-color: #4e9d84;
+    background-color: $grey;
     color: white;
 
     .modal-title {
@@ -286,14 +308,29 @@ body {
       height: 100%;
       overflow: auto;
 
+      input {
+        box-shadow: inset 0 3px $light-grey;
+      }
+
+      .form-control {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        position: sticky;
+        top: 0;
+        background-color: white;
+        padding-bottom: 1em;
+      }
+
       #process-forms-container {
         display: flex;
         flex-wrap: wrap;
+        margin-top: -1em;
       }
 
       .process-form {
         color: white;
-        background-color: #333642;
+        background-color: $grey;
         flex: 1;
         display: flex;
         flex-direction: column;

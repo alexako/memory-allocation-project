@@ -476,6 +476,16 @@ function closeModal() {
     console.log("closed modal");
 }
 
+function validate(element) {
+    console.log(element);
+    if (element.attributes["id"].value === "number-of-processes") {
+        createProcessesForm();
+    }
+}
+
+function updateForm() {
+}
+
 function createProcessesForm() {
     const formContainer = document.getElementById("process-forms-container");
     const firstChild = formContainer.children[0].cloneNode(true);
