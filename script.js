@@ -478,12 +478,12 @@ function closeModal() {
 
 function validate(element) {
     console.log(element);
+    if (isNaN(element.value)) {
+        element.value = element.value.slice(0, -1);
+    }
     if (element.attributes["id"].value === "number-of-processes") {
         createProcessesForm();
     }
-}
-
-function updateForm() {
 }
 
 function createProcessesForm() {
