@@ -16,7 +16,7 @@
           <div id="processes-list">
           </div>
           <div id="add-process-btn"
-               onclick="createRandomProcesses()">
+               onclick="openModal()">
             <i class="fas fa-plus"></i>
             Create processes
           </div>
@@ -133,6 +133,21 @@
           </div>
           
         </div> <!-- END main-content -->
+
+        <!-- Create processes modal -->
+        <div id="create-processes-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    Create Processes
+                </div>
+                <div class="modal-close-btn"
+                    onclick="closeModal()">x</div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-container"></div>
+            </div>
+        </div>
+        <!-- END Create processes modal -->
         
       </div>
       <script type="text/javascript" src="script.js"></script>

@@ -464,4 +464,16 @@ function getRandomInRange(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+function openModal() {
+    const modal = document.getElementById("create-processes-modal");
+    modal.style.display = "block";
+    console.log("showing modal");
+}
+
+function closeModal() {
+    const modal = document.getElementById("create-processes-modal");
+    modal.style.display = "none";
+    console.log("closed modal");
+}
+
 reset();

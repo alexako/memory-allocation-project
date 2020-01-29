@@ -224,4 +224,38 @@ body {
   justify-content: center;
 }
 
+#create-processes-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 60%;
+  width: 700px;
+  transform: translate(-50%, -50%);
+  background-color: snow;
+  box-shadow: 0 3px 5px #4a4a4a;
+}
+#create-processes-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  background-color: #4e9d84;
+  color: white;
+}
+#create-processes-modal .modal-header .modal-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  padding: 1em;
+}
+#create-processes-modal .modal-header .modal-close-btn {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 1em;
+}
+#create-processes-modal .modal-body {
+  padding: 1em;
+  position: relative;
+}
+#create-processes-modal .modal-body .modal-container {
+  overflow: auto;
+}
+
 /*# sourceMappingURL=styles.css.map */
