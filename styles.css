@@ -1,7 +1,8 @@
+html,
 body {
   padding: 0;
   margin: 0;
-  width: 100%;
+  width: 100vh;
 }
 
 .green {
@@ -57,11 +58,11 @@ body {
   display: flex;
 }
 .container .header .controls {
-  flex-grow: 100;
+  width: 100%;
   color: snow;
   background-color: #333642;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-evenly;
 }
 .container .header .controls__run-sim {
   cursor: pointer;
@@ -78,9 +79,20 @@ body {
 .container .header .controls__memory-type:hover {
   background-color: #444857;
 }
+.container .header .controls__compaction {
+  cursor: pointer;
+}
+.container .header .controls__compaction:hover {
+  background-color: #444857;
+}
+.container .header .controls__coalescing {
+  cursor: pointer;
+}
+.container .header .controls__coalescing:hover {
+  background-color: #444857;
+}
 .container .header .controls div {
-  padding: 1.5em 2em;
-  margin-right: 1.5em;
+  padding: 1.5em 1.5em;
   white-space: nowrap;
   border-bottom: 3px solid #444857;
 }

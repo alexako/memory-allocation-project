@@ -7,10 +7,11 @@ $blue: #4c719f;
 $blue-hover: #5b86bd;
 $yellow: #ffdd40; 
 
+html,
 body {
     padding: 0;
     margin: 0;
-    width: 100%;
+    width: 100vh;
 }
 
 .green { color: limegreen; }
@@ -55,11 +56,11 @@ body {
     display: flex;
     
     .controls {
-      flex-grow: 100;
+      width: 100%;
       color: snow;
       background-color: $grey;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-evenly;
       
       &__run-sim {
         cursor: pointer;
@@ -81,12 +82,23 @@ body {
           background-color: $light-grey;
         }
       }
-      &__compaction {}
-      &__coalescing {}
+      &__compaction {
+        cursor: pointer;
+        // display: none;
+        &:hover {
+          background-color: $light-grey;
+        }
+      }
+      &__coalescing {
+        cursor: pointer;
+        // display: none;
+        &:hover {
+          background-color: $light-grey;
+        }
+      }
       
       div {
-        padding: 1.5em 2em;
-        margin-right: 1.5em;
+        padding: 1.5em 1.5em;
         white-space: nowrap;
         border-bottom: 3px solid $light-grey;
       }
