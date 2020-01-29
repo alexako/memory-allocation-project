@@ -347,7 +347,7 @@ function createMemoryBlocks() {
         const memSoFar = Object.keys(memoryBlocks).map((k) => { return memoryBlocks[k].size; })
         const blockSize = (i === numOfBlocks - 1) // Last block fills remaining memory
             ? totalMem - memSoFar.reduce((t, c) => { return t + c; })
-            : Math.round((totalMem/numOfBlocks) + getRandomInRange(-40, 40));
+            : Math.round((totalMem/numOfBlocks) + getRandomInRange(-20, 20));
         const memId = "memAddr-" + (i+1);
         const blockEl = document.createElement("div");
         blockEl.setAttribute("id", memId);
@@ -456,6 +456,39 @@ function createRandomProcesses() {
     updateUI();
 }
 
+function compaction() {
+
+}
+
+function coalesce() {
+    console.log("coalescing");
+    for (let i = 0; i < memoryBlocks.length-1; i++) {
+        if (isEmpty(memoryBlocks[i]) && isEmpty(memoryBlocks[i+1])) {
+            mergeBlocks(memoryBlocks[i],  memoryBlocks[i+1]);
+        }
+    }
+}
+
+function mergeBlocks(block1, block2) {
+    console.log("merging ", block1.memId, block2.memId);
+
+    const el = document.getElementById("total-memory-size");
+    const totalMem = parseInt(el.options[el.selectedIndex].value);
+
+    block1.size = block1.size + block2.size;
+    console.log("adding", block1.size, block2.size, block1.size + block2.size);
+
+    block1.element.innerHTML = "<span class=\"label\">Block " + block1.memId.split("-")[1]
+        +" unallocated - " + block1.size + "kB</span>";
+    block1.element.style.height = Math.round((block1.size/totalMem) * 100) - 1 + "%";
+
+    // activeMemory.removeChild(block1.element);
+    activeMemory.removeChild(block2.element);
+    // activeMemory.append(block1);
+
+    memoryBlocks = memoryBlocks.filter((block) => block.memId !== block2.memId);
+}
+
 function cleanupMemory(memoryBlock) {
     memoryBlock.processes = [];
     memoryBlock.element.innerHTML = "";
@@ -498,6 +531,10 @@ function isActive(process) {
         }
     }
     return false;
+}
+
+function isEmpty(memoryBlock) {
+    return memoryBlock.processes.length === 0;
 }
 
 function isLive(process) {

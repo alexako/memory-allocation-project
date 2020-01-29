@@ -71,27 +71,14 @@ body {
           background-color: $light-grey;
         }
       }
-      
-      &__algorithms {
-      }
-      
-      &__memory-size {}
-      &__memory-type {
-        cursor: pointer;
-        &:hover {
-          background-color: $light-grey;
-        }
-      }
       &__compaction {
         cursor: pointer;
-        // display: none;
         &:hover {
           background-color: $light-grey;
         }
       }
-      &__coalescing {
+      &__coalesce {
         cursor: pointer;
-        // display: none;
         &:hover {
           background-color: $light-grey;
         }
