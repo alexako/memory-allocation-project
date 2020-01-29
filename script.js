@@ -467,7 +467,7 @@ function getRandomInRange(min, max) {
 function openModal() {
     const modal = document.getElementById("create-processes-modal");
     modal.style.display = "flex";
-    console.log("showing modal");
+    createProcessesForm();
 }
 
 function closeModal() {
@@ -479,21 +479,28 @@ function closeModal() {
 function createProcessesForm() {
     const formContainer = document.getElementById("process-forms-container");
     const firstChild = formContainer.children[0].cloneNode(true);
+    (firstChild.children.length > 2) ? firstChild.removeChild(firstChild.firstChild) : "";
     formContainer.innerHTML = "";
     formContainer.appendChild(firstChild);
 
     const numberOfProcesses = parseInt(document.getElementById("number-of-processes").value);
 
-    for (let i = 0; i < numberOfProcesses-1; i++) {
-        const processForm = document.getElementById("process-form").cloneNode(true);
+    for (let i = 1; i < numberOfProcesses; i++) {
+        const processForm = document.getElementById("fid-1").cloneNode(true);
+        processForm.setAttribute("id", "fid-" + (i+1));
+        const jobLabel = document.createElement("div");
+        jobLabel.classList.add("process-label");
+        jobLabel.innerHTML = "Job " + (i+1);
+        processForm.prepend(jobLabel);
         formContainer.append(processForm);
     }
 
-    const labels = document.getElementsByClassName("process-labels");
-    for (let i = 0; i < labels.length; i++) {
-        labels.item(i).innerHTML = "Job " + (i + 1) + " size:"
-    }
-
+    // First process form
+    const processForm = document.getElementById("fid-1");
+    const jobLabel = document.createElement("div");
+    jobLabel.classList.add("process-label");
+    jobLabel.innerHTML = "Job 1"; 
+    processForm.prepend(jobLabel);
 }
 
 reset();
