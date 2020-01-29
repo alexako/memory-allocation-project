@@ -14,6 +14,8 @@ body {
 .inactive { color: red; }
 .active-btn { border-bottom: 3px solid $yellow; }
 
+.state-indicator { padding: 0.5em; }
+
 .container {
   font-family: 'Lato', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, Sans-Serif;
   height: 100vh;
@@ -253,6 +255,8 @@ body {
   transform: translate(-50%, -50%);
   background-color: snow;
   box-shadow: 0 3px 5px #4a4a4a;
+  display: none;
+  flex-direction: column;
 
   .modal-header {
     display: flex;
@@ -274,9 +278,12 @@ body {
   }
 
   .modal-body {
+    flex: 1;
     padding: 1em;
     position: relative;
+    overflow: auto;
     .modal-container {
+      height: 100%;
       overflow: auto;
     }
   }

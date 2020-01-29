@@ -429,8 +429,8 @@ function reset() {
     cycleCountElem.innerHTML = 0;
     cycleCount = 0;
     processList.innerHTML = "";
-    currentProcess.innerHTML = "<div>Not running...</div>";
-    memoryState.innerHTML = "<div>Not running...</div>";
+    currentProcess.innerHTML = "<div class=\"state-indicator\">Not running...</div>";
+    memoryState.innerHTML = "<div class=\"state-indicator\">Not running...</div>";
     memoryBlocks = [];
     processes = [];
     activeProcesses = [];
@@ -466,7 +466,7 @@ function getRandomInRange(min, max) {
 
 function openModal() {
     const modal = document.getElementById("create-processes-modal");
-    modal.style.display = "block";
+    modal.style.display = "flex";
     console.log("showing modal");
 }
 
@@ -474,6 +474,26 @@ function closeModal() {
     const modal = document.getElementById("create-processes-modal");
     modal.style.display = "none";
     console.log("closed modal");
+}
+
+function createProcessesForm() {
+    const formContainer = document.getElementById("process-forms-container");
+    const firstChild = formContainer.children[0].cloneNode(true);
+    formContainer.innerHTML = "";
+    formContainer.appendChild(firstChild);
+
+    const numberOfProcesses = parseInt(document.getElementById("number-of-processes").value);
+
+    for (let i = 0; i < numberOfProcesses-1; i++) {
+        const processForm = document.getElementById("process-form").cloneNode(true);
+        formContainer.append(processForm);
+    }
+
+    const labels = document.getElementsByClassName("process-labels");
+    for (let i = 0; i < labels.length; i++) {
+        labels.item(i).innerHTML = "Job " + (i + 1) + " size:"
+    }
+
 }
 
 reset();

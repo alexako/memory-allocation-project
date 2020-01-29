@@ -20,6 +20,10 @@ body {
   border-bottom: 3px solid #ffdd40;
 }
 
+.state-indicator {
+  padding: 0.5em;
+}
+
 .container {
   font-family: "Lato", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Sans-Serif;
   height: 100vh;
@@ -233,6 +237,8 @@ body {
   transform: translate(-50%, -50%);
   background-color: snow;
   box-shadow: 0 3px 5px #4a4a4a;
+  display: none;
+  flex-direction: column;
 }
 #create-processes-modal .modal-header {
   display: flex;
@@ -251,10 +257,13 @@ body {
   padding: 1em;
 }
 #create-processes-modal .modal-body {
+  flex: 1;
   padding: 1em;
   position: relative;
+  overflow: auto;
 }
 #create-processes-modal .modal-body .modal-container {
+  height: 100%;
   overflow: auto;
 }
 
