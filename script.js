@@ -51,7 +51,7 @@ function queueProcess(process) {
 }
 
 // Place process into memory block
-function allocate(process, memoryBlock) {
+function allocate(process, memoryBlock, compaction=false) {
     console.log("Loading", process.pid, "into",  memoryBlock.memId);
 
     memoryBlock.element.style.border = "3px solid green";
@@ -59,29 +59,32 @@ function allocate(process, memoryBlock) {
     // Create process block element to be loaded into this memory block
     process.block.style.height = (process.size/memoryBlock.size) * 100 + "%";
     let memBlockElem = document.getElementById(memoryBlock.memId);
-    memBlockElem.innerHTML = "";
+    if (!compaction) {
+        memBlockElem.innerHTML = "";
+
+        // Display remaining memory after allocation
+        let remaining = document.createElement("span");
+        remaining.classList.add("label");
+        remaining.innerHTML = "Block: " + memoryBlock.memId.split("-")[1] + ": "
+            + freeSpace(memoryBlock) + "kB fragmented";
+
+        // Resize or hide block label depending on size of remaining space 
+        if (((process.size/memoryBlock.size)*100) > 85) {
+            remaining.style.fontSize = "0.75em";
+            if (((process.size/memoryBlock.size)*100) > 95) {
+                remaining.style.opacity = 0;
+            }
+        }
+
+        memBlockElem.append(remaining);
+        currentProcessWindow.push([process, memoryBlock]);
+    }
 
     memBlockElem.style.justifyContent = "start";
     memBlockElem.append(process.block);
 
-    // Display remaining memory after allocation
-    let remaining = document.createElement("span");
-    remaining.classList.add("label");
-    remaining.innerHTML = "Block: " + memoryBlock.memId.split("-")[1] + ": "
-        + (memoryBlock.size - process.size) + "kB fragmented";
-
-    // Resize or hide block label depending on size of remaining space 
-    if (((process.size/memoryBlock.size)*100) > 85) {
-        remaining.style.fontSize = "0.75em";
-        if (((process.size/memoryBlock.size)*100) > 95) {
-            remaining.style.opacity = 0;
-        }
-    }
-
-    memBlockElem.append(remaining);
     memoryBlock.processes.push(process);
     activeProcesses.push(process);
-    currentProcessWindow.push([process, memoryBlock]);
 
     // Remove from queued processes window
     process.element.remove();
@@ -458,10 +461,28 @@ function createRandomProcesses() {
 
 function compaction() {
 
+    for (let i = 0; i < memoryBlocks.length; i++) {
+        const memoryBlock = memoryBlocks[i];
+        cleanupMemory(memoryBlock);
+    }
+
+    const done = [];
+
+    let pIndex = 0;
+    for (let i = 0; i < memoryBlocks.length; i++) {
+        const memoryBlock = memoryBlocks[i];
+        while (pIndex < activeProcesses.length) {
+            if (freeSpace(memoryBlock) >= activeProcesses[pIndex].size
+                    && !done.includes(activeProcesses[pIndex].pid)) {
+                allocate(activeProcesses[pIndex], memoryBlock, true);
+                done.push(activeProcesses[pIndex].pid);
+            }
+            pIndex += 1;
+        }
+    }
 }
 
 function coalesce() {
-    console.log("coalescing");
     for (let i = 0; i < memoryBlocks.length-1; i++) {
         if (isEmpty(memoryBlocks[i]) && isEmpty(memoryBlocks[i+1])) {
             mergeBlocks(memoryBlocks[i],  memoryBlocks[i+1]);
@@ -482,11 +503,37 @@ function mergeBlocks(block1, block2) {
         +" unallocated - " + block1.size + "kB</span>";
     block1.element.style.height = Math.round((block1.size/totalMem) * 100) - 1 + "%";
 
-    // activeMemory.removeChild(block1.element);
     activeMemory.removeChild(block2.element);
-    // activeMemory.append(block1);
 
     memoryBlocks = memoryBlocks.filter((block) => block.memId !== block2.memId);
+}
+
+function freeSpace(memoryBlock) {
+    if (memoryBlock.processes.length === 0) { return memoryBlock.size; }
+    const memUsed = memoryBlock.processes.map((p) => { return p.size; })
+    return memoryBlock.size - memUsed.reduce((t, c) => { return t + c; });
+}
+
+function getOwningBlock(process) {
+    for (let i = 0; i < memoryBlocks.length; i++) {
+        for (let j = 0; j < memoryBlocks[i].processes.length; j++) {
+            if (memoryBlocks[i].processes[j].pid === process.pid) {
+                return memoryBlocks[i];
+            }
+        }
+    }
+
+    return null;
+}
+
+function isProcessInBlock(process, block) {
+    for (let i = 0; i < block.processes.length; i++) {
+        if (process.pid === block.processes[i].pid) {
+            console.log(process.pid, "found in", block.memId);
+            return true;
+        }
+    }
+    return false;
 }
 
 function cleanupMemory(memoryBlock) {
