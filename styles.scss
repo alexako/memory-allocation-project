@@ -1,6 +1,10 @@
 $grey: #333642;
-$mint-green: #4e9d84;
+$grey-hover: #4d5162;
 $light-grey: #444857;
+$mint-green: #4e9d84;
+$mint-green-hover: #5bbd9e;
+$blue: #4c719f;
+$blue-hover: #5b86bd;
 $yellow: #ffdd40; 
 
 body {
@@ -13,6 +17,26 @@ body {
 .active { color: highlight-yellow; }
 .inactive { color: red; }
 .active-btn { border-bottom: 3px solid $yellow; }
+
+.button {
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  padding: 1em;
+  background-color: $blue;
+  cursor: pointer;
+  &:hover {
+    background-color: $blue-hover;
+  }
+  &--create {
+    background-color: $mint-green;
+    &:hover {
+      background-color: $mint-green-hover;
+    }
+  }
+}
+
+.state-indicator { padding: 0.5em; }
 
 .container {
   font-family: 'Lato', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, Sans-Serif;
@@ -241,5 +265,88 @@ body {
   &--unallocated {
     background-color: #758184;
     justify-content: center;
+  }
+}
+
+#create-processes-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 60%;
+  width: 700px;
+  transform: translate(-50%, -50%);
+  background-color: snow;
+  box-shadow: 0 3px 5px #4a4a4a;
+  display: none;
+  flex-direction: column;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    background-color: $grey;
+    color: white;
+
+    .modal-title {
+      font-size: 1.1em;
+      font-weight: 700;
+      padding: 1em;
+    }
+
+    .modal-close-btn {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 1em;
+    }
+  }
+
+  .modal-body {
+    flex: 1;
+    padding: 1em;
+    position: relative;
+    overflow: auto;
+    .modal-container {
+      height: 100%;
+      overflow: auto;
+
+      input {
+        text-align: right;
+      }
+
+      .form-control {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        position: sticky;
+        top: 0;
+        background-color: white;
+        padding-bottom: 1em;
+      }
+
+      #process-forms-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: -1em;
+      }
+
+      .process-form {
+        color: white;
+        background-color: $grey;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 5px 5px #c1c1c1;
+        margin: 1em;
+        padding: 1em;
+        max-width: 160px;
+      }
+
+      .form-input-container {
+        margin: 0.25em;
+      }
+
+      .process-label {
+        font-weight: 700;
+      }
+    }
   }
 }

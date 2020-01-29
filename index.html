@@ -16,7 +16,7 @@
           <div id="processes-list">
           </div>
           <div id="add-process-btn"
-               onclick="createRandomProcesses()">
+               onclick="openModal()">
             <i class="fas fa-plus"></i>
             Create processes
           </div>
@@ -133,6 +133,70 @@
           </div>
           
         </div> <!-- END main-content -->
+
+        <!-- Create processes modal -->
+        <div id="create-processes-modal">
+          <div class="modal-header">
+              <div class="modal-title">
+                  Create Processes
+              </div>
+              <div class="modal-close-btn"
+                  onclick="closeModal()">x</div>
+          </div>
+          <div class="modal-body">
+            <div class="modal-container">
+                <div class="form-control">
+                  <label for="number-of-processes">
+                    Number of processes 
+                    <input id="number-of-processes"
+                          name="number-of-processes"
+                          type="text"
+                          value="1"
+                          onfocus="var temp_value=this.value; this.value=''; this.value=temp_value"
+                          oninput="validate(this)">
+                  </label>
+                  <div class="button"
+                    onclick="createRandomProcesses()">
+                    Create Random
+                  </div>
+                  <div class="button button--create"
+                    onclick="createProcesses()">
+                    Create
+                  </div>
+                </div>
+
+                <div id="process-forms-container">
+                  <div id="fid-1" class="process-form">
+                    <div class="form-input-container">
+                      <label for="process-size">
+                        Size (in kB)
+                      </label>
+                      <input id="process-size"
+                            name="process-size"
+                            type="text"
+                            value="1"
+                            onfocus="var temp_value=this.value; this.value=''; this.value=temp_value"
+                            oninput="validate(this)"/>
+                    </div>
+
+                    <div class="form-input-container">
+                      <label for="number-of-cycles">
+                        Cycles
+                      </label>
+                      <input id="number-of-cycles"
+                            name="number-of-cycles"
+                            type="text"
+                            value="1"
+                            onfocus="var temp_value=this.value; this.value=''; this.value=temp_value"
+                            oninput="validate(this)"/>
+                    </div>
+                  </div>
+                </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- END Create processes modal -->
         
       </div>
       <script type="text/javascript" src="script.js"></script>

@@ -367,19 +367,62 @@ function createMemoryBlocks() {
     }
 }
 
+function createProcesses() {
+    reset();
+    let numOfProcesses = document.getElementById("number-of-processes").value;
+    numOfProcesses = isNaN(numOfProcesses) ? 1 : parseInt(numOfProcesses);
+    const processForms = document.getElementById("process-forms-container");
+
+    for (let i = 0; i < numOfProcesses; i++) {
+        const processForm = processForms.children[i];
+        const pid = "pid-" + processForm.getAttribute("id").slice(-1);
+        const procSize = parseInt(processForm.children[1].children[1].value);
+        const procCycles = parseInt(processForm.children[2].children[1].value);
+
+        // List element
+        const processElem = document.createElement("div");
+        processElem.setAttribute("id", pid);
+        processElem.innerHTML = "Job: " + (i+1) + " - " + procSize + "kB - " + procCycles + " cycles";
+
+        // Memory Element
+        const processEl = document.createElement("div");
+        processEl.setAttribute("id", "mem-" + pid);
+        processEl.className = "memory-block memory-block--process";
+        processEl.innerHTML = "<span class=\"label\">" + processElem.innerHTML + "</span>";
+        processEl.style.backgroundColor = blockColors[Math.floor(Math.random()*blockColors.length)];
+
+        // Add process to queue
+        addProcess(processElem);
+
+        let process = {
+            "pid": pid,
+            "size": procSize,
+            "life": procCycles, // Number of cycles needed to complete
+            "element": processElem, // Process list element in queues
+            "block": processEl // Process block element in active memory
+        }
+        processes.push(process);
+    }
+
+    closeModal();
+    updateUI();
+}
+
 function createRandomProcesses() {
+    processList.innerHTML = "";
     const el = document.getElementById("total-memory-size");
     const e = document.getElementById("num-of-blocks");
     const totalMem = parseInt(el.options[el.selectedIndex].value);
     const numOfBlocks = parseInt(e.options[e.selectedIndex].value);
     const processCount = processes.length;
+    const numOfProcesses = parseInt(document.getElementById("number-of-processes").value);
 
     // Load existing processes
     processes.forEach((process) => {
-        addProcess(process.element);
+        processList.append(process.element);
     });
 
-    for (let i = processCount; i < processCount + getRandomInRange(4, 8); i++) {
+    for (let i = processCount; i < processCount + numOfProcesses; i++) {
         const pid = "pid-" + (i+1);
         const procSize = Math.round(getRandomInRange(50, (totalMem/numOfBlocks) - 10));
         const life = Math.round(getRandomInRange(4, 10)); // Number of cycles needed to complete
@@ -409,6 +452,7 @@ function createRandomProcesses() {
         processes.push(process);
     }
     
+    closeModal();
     updateUI();
 }
 
@@ -429,8 +473,8 @@ function reset() {
     cycleCountElem.innerHTML = 0;
     cycleCount = 0;
     processList.innerHTML = "";
-    currentProcess.innerHTML = "<div>Not running...</div>";
-    memoryState.innerHTML = "<div>Not running...</div>";
+    currentProcess.innerHTML = "<div class=\"state-indicator\">Not running...</div>";
+    memoryState.innerHTML = "<div class=\"state-indicator\">Not running...</div>";
     memoryBlocks = [];
     processes = [];
     activeProcesses = [];
@@ -462,6 +506,50 @@ function isLive(process) {
 
 function getRandomInRange(min, max) {
     return Math.random() * (max - min) + min;
+}
+
+function openModal() {
+    const modal = document.getElementById("create-processes-modal");
+    modal.style.display = "flex";
+    createProcessesForm();
+}
+
+function closeModal() {
+    const modal = document.getElementById("create-processes-modal");
+    modal.style.display = "none";
+}
+
+function validate(element) {
+    if (isNaN(element.value)) { element.value = element.value.slice(0, -1); }
+    if (element.attributes["id"].value === "number-of-processes") { createProcessesForm(); }
+}
+
+function createProcessesForm() {
+    const formContainer = document.getElementById("process-forms-container");
+    const firstChild = formContainer.children[0].cloneNode(true);
+    (firstChild.children.length > 2) ? firstChild.removeChild(firstChild.firstChild) : "";
+    formContainer.innerHTML = "";
+    formContainer.appendChild(firstChild);
+
+    const n = document.getElementById("number-of-processes").value;
+    const numberOfProcesses = isNaN(n) ? 1 : parseInt(n);
+
+    for (let i = 1; i < numberOfProcesses; i++) {
+        const processForm = document.getElementById("fid-1").cloneNode(true);
+        processForm.setAttribute("id", "fid-" + (i+1));
+        const jobLabel = document.createElement("div");
+        jobLabel.classList.add("process-label");
+        jobLabel.innerHTML = "Job " + (i+1);
+        processForm.prepend(jobLabel);
+        formContainer.append(processForm);
+    }
+
+    // First process form
+    const processForm = document.getElementById("fid-1");
+    const jobLabel = document.createElement("div");
+    jobLabel.classList.add("process-label");
+    jobLabel.innerHTML = "Job 1"; 
+    processForm.prepend(jobLabel);
 }
 
 reset();

@@ -20,6 +20,28 @@ body {
   border-bottom: 3px solid #ffdd40;
 }
 
+.button {
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  padding: 1em;
+  background-color: #4c719f;
+  cursor: pointer;
+}
+.button:hover {
+  background-color: #5b86bd;
+}
+.button--create {
+  background-color: #4e9d84;
+}
+.button--create:hover {
+  background-color: #5bbd9e;
+}
+
+.state-indicator {
+  padding: 0.5em;
+}
+
 .container {
   font-family: "Lato", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Sans-Serif;
   height: 100vh;
@@ -222,6 +244,79 @@ body {
 .memory-block--unallocated {
   background-color: #758184;
   justify-content: center;
+}
+
+#create-processes-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 60%;
+  width: 700px;
+  transform: translate(-50%, -50%);
+  background-color: snow;
+  box-shadow: 0 3px 5px #4a4a4a;
+  display: none;
+  flex-direction: column;
+}
+#create-processes-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  background-color: #333642;
+  color: white;
+}
+#create-processes-modal .modal-header .modal-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  padding: 1em;
+}
+#create-processes-modal .modal-header .modal-close-btn {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 1em;
+}
+#create-processes-modal .modal-body {
+  flex: 1;
+  padding: 1em;
+  position: relative;
+  overflow: auto;
+}
+#create-processes-modal .modal-body .modal-container {
+  height: 100%;
+  overflow: auto;
+}
+#create-processes-modal .modal-body .modal-container input {
+  text-align: right;
+}
+#create-processes-modal .modal-body .modal-container .form-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding-bottom: 1em;
+}
+#create-processes-modal .modal-body .modal-container #process-forms-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: -1em;
+}
+#create-processes-modal .modal-body .modal-container .process-form {
+  color: white;
+  background-color: #333642;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 5px #c1c1c1;
+  margin: 1em;
+  padding: 1em;
+  max-width: 160px;
+}
+#create-processes-modal .modal-body .modal-container .form-input-container {
+  margin: 0.25em;
+}
+#create-processes-modal .modal-body .modal-container .process-label {
+  font-weight: 700;
 }
 
 /*# sourceMappingURL=styles.css.map */
