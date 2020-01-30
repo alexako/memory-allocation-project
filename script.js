@@ -1,3 +1,9 @@
+/**
+ * IT154-1L/EM01 Final Project
+ * Memeory Allocation Simulation
+ * Group 5
+ */
+
 let processList = document.getElementById("processes-list");
 let currentProcess = document.getElementById("current-process-info");
 let activeProcessesElem = document.getElementById("active-processes");
@@ -77,6 +83,7 @@ function allocate(process, memoryBlock, compaction=false) {
         }
 
         memBlockElem.append(remaining);
+        memoryBlock.processes.push(process);
         currentProcessWindow.push([process, memoryBlock]);
     }
 
@@ -84,7 +91,7 @@ function allocate(process, memoryBlock, compaction=false) {
     memBlockElem.append(process.block);
 
     memoryBlock.processes.push(process);
-    activeProcesses.push(process);
+    if (!compaction) { activeProcesses.push(process); }
 
     // Remove from queued processes window
     process.element.remove();
@@ -378,7 +385,7 @@ function createProcesses() {
 
     for (let i = 0; i < numOfProcesses; i++) {
         const processForm = processForms.children[i];
-        const pid = "pid-" + processForm.getAttribute("id").slice(-1);
+        const pid = "pid-" + processForm.getAttribute("id").split("-")[1];
         const procSize = parseInt(processForm.children[1].children[1].value);
         const procCycles = parseInt(processForm.children[2].children[1].value);
 
@@ -480,6 +487,8 @@ function compaction() {
             pIndex += 1;
         }
     }
+
+    updateUI();
 }
 
 function coalesce() {
