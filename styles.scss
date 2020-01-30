@@ -1,18 +1,43 @@
 $grey: #333642;
-$mint-green: #4e9d84;
+$grey-hover: #4d5162;
 $light-grey: #444857;
+$mint-green: #4e9d84;
+$mint-green-hover: #5bbd9e;
+$blue: #4c719f;
+$blue-hover: #5b86bd;
 $yellow: #ffdd40; 
 
+html,
 body {
     padding: 0;
     margin: 0;
-
+    width: 100vh;
 }
 
 .green { color: limegreen; }
 .active { color: highlight-yellow; }
 .inactive { color: red; }
 .active-btn { border-bottom: 3px solid $yellow; }
+
+.button {
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  padding: 1em;
+  background-color: $blue;
+  cursor: pointer;
+  &:hover {
+    background-color: $blue-hover;
+  }
+  &--create {
+    background-color: $mint-green;
+    &:hover {
+      background-color: $mint-green-hover;
+    }
+  }
+}
+
+.state-indicator { padding: 0.5em; }
 
 .container {
   font-family: 'Lato', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, Sans-Serif;
@@ -31,11 +56,11 @@ body {
     display: flex;
     
     .controls {
-      flex-grow: 100;
+      width: 100%;
       color: snow;
       background-color: $grey;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-evenly;
       
       &__run-sim {
         cursor: pointer;
@@ -46,23 +71,21 @@ body {
           background-color: $light-grey;
         }
       }
-      
-      &__algorithms {
-      }
-      
-      &__memory-size {}
-      &__memory-type {
+      &__compaction {
         cursor: pointer;
         &:hover {
           background-color: $light-grey;
         }
       }
-      &__compaction {}
-      &__coalescing {}
+      &__coalesce {
+        cursor: pointer;
+        &:hover {
+          background-color: $light-grey;
+        }
+      }
       
       div {
-        padding: 1.5em 2em;
-        margin-right: 1.5em;
+        padding: 1.5em 1.5em;
         white-space: nowrap;
         border-bottom: 3px solid $light-grey;
       }
@@ -75,7 +98,7 @@ body {
     display: flex;
     flex-flow: column;
     height: 100%; 
-    min-width: 250px;
+    min-width: 285px;
     background-color: $grey;
     
     .title {
@@ -87,24 +110,18 @@ body {
       font-weight: bold;
     }
     
-    #processes {
+    #processes-list {
       flex: 1;
       background: snow;
       border-radius: 0.15em;
       margin: 2em;
       margin-bottom: 3em;
-      max-height: 300px;
+      overflow: auto;
       
-      #processes-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        
-        li {
-          padding: 0.2em 0.5em;
-          &:nth-child(even) {
-            background-color: rgba(173, 216, 230, 0.24);
-          }
+      div {
+        padding: 0.2em 0.5em;
+        &:nth-child(even) {
+          background-color: rgba(173, 216, 230, 0.24);
         }
       }
     }
@@ -132,12 +149,17 @@ body {
     
     #active-processes {
       flex: 1;
-      padding: 0.75em;
       margin: 1em 0 0 0;
       text-decoration: none;
       list-style: none;
       color: $grey;
       background-color: white;
+      div {
+        padding: 0.2em 0.5em;
+        &:nth-child(even) {
+          background-color: rgba(173, 216, 230, 0.24);
+        }
+      }
     }
   }
   
@@ -167,8 +189,14 @@ body {
   #current-process-info {
     color: $grey;
     background-color: white;
-    padding: 0.75em;
     margin-top: 1em;
+    div {
+      padding: 0.2em 0.5em;
+      font-weight: 700;
+      &:nth-child(even) {
+        background-color: rgba(173, 216, 230, 0.24);
+      }
+    }
   }
   
   #status {
@@ -204,7 +232,7 @@ body {
       display: flex;
       justify-content: space-between;
       
-      .state-container { min-width: 156px; }
+      .state-container { display: none; min-width: 156px; }
     }
   }
   
@@ -219,19 +247,105 @@ body {
 }
 
 .memory-block {
-  height: 50%;
   font-weight: 700;
   color: white;
   border: 1px solid black;
   box-shadow: inset 0 0 0.25em black;
   text-align: center;
-  
+  display: flex;
+  flex-direction: column;
+
+  &--process {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   &--unallocated {
     background-color: #758184;
+    justify-content: center;
   }
-  
-  .label {
+}
+
+#create-processes-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 60%;
+  width: 700px;
+  transform: translate(-50%, -50%);
+  background-color: snow;
+  box-shadow: 0 3px 5px #4a4a4a;
+  display: none;
+  flex-direction: column;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    background-color: $grey;
+    color: white;
+
+    .modal-title {
+      font-size: 1.1em;
+      font-weight: 700;
+      padding: 1em;
+    }
+
+    .modal-close-btn {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 1em;
+    }
+  }
+
+  .modal-body {
+    flex: 1;
+    padding: 1em;
     position: relative;
-    top: 45%;
+    overflow: auto;
+    .modal-container {
+      height: 100%;
+      overflow: auto;
+
+      input {
+        text-align: right;
+      }
+
+      .form-control {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        position: sticky;
+        top: 0;
+        background-color: white;
+        padding-bottom: 1em;
+      }
+
+      #process-forms-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: -1em;
+      }
+
+      .process-form {
+        color: white;
+        background-color: $grey;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 5px 5px #c1c1c1;
+        margin: 1em;
+        padding: 1em;
+        max-width: 160px;
+      }
+
+      .form-input-container {
+        margin: 0.25em;
+      }
+
+      .process-label {
+        font-weight: 700;
+      }
+    }
   }
 }

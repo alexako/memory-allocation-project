@@ -1,6 +1,8 @@
+html,
 body {
   padding: 0;
   margin: 0;
+  width: 100vh;
 }
 
 .green {
@@ -19,6 +21,28 @@ body {
   border-bottom: 3px solid #ffdd40;
 }
 
+.button {
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  padding: 1em;
+  background-color: #4c719f;
+  cursor: pointer;
+}
+.button:hover {
+  background-color: #5b86bd;
+}
+.button--create {
+  background-color: #4e9d84;
+}
+.button--create:hover {
+  background-color: #5bbd9e;
+}
+
+.state-indicator {
+  padding: 0.5em;
+}
+
 .container {
   font-family: "Lato", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Sans-Serif;
   height: 100vh;
@@ -34,11 +58,11 @@ body {
   display: flex;
 }
 .container .header .controls {
-  flex-grow: 100;
+  width: 100%;
   color: snow;
   background-color: #333642;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-evenly;
 }
 .container .header .controls__run-sim {
   cursor: pointer;
@@ -49,15 +73,20 @@ body {
 .container .header .controls__run-sim:active {
   background-color: #444857;
 }
-.container .header .controls__memory-type {
+.container .header .controls__compaction {
   cursor: pointer;
 }
-.container .header .controls__memory-type:hover {
+.container .header .controls__compaction:hover {
+  background-color: #444857;
+}
+.container .header .controls__coalesce {
+  cursor: pointer;
+}
+.container .header .controls__coalesce:hover {
   background-color: #444857;
 }
 .container .header .controls div {
-  padding: 1.5em 2em;
-  margin-right: 1.5em;
+  padding: 1.5em 1.5em;
   white-space: nowrap;
   border-bottom: 3px solid #444857;
 }
@@ -68,7 +97,7 @@ body {
   display: flex;
   flex-flow: column;
   height: 100%;
-  min-width: 250px;
+  min-width: 285px;
   background-color: #333642;
 }
 .container .sidebar .title {
@@ -79,23 +108,18 @@ body {
   white-space: nowrap;
   font-weight: bold;
 }
-.container .sidebar #processes {
+.container .sidebar #processes-list {
   flex: 1;
   background: snow;
   border-radius: 0.15em;
   margin: 2em;
   margin-bottom: 3em;
-  max-height: 300px;
+  overflow: auto;
 }
-.container .sidebar #processes #processes-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.container .sidebar #processes #processes-list li {
+.container .sidebar #processes-list div {
   padding: 0.2em 0.5em;
 }
-.container .sidebar #processes #processes-list li:nth-child(even) {
+.container .sidebar #processes-list div:nth-child(even) {
   background-color: rgba(173, 216, 230, 0.24);
 }
 .container .sidebar #add-process-btn {
@@ -119,12 +143,17 @@ body {
 }
 .container .content #active-processes {
   flex: 1;
-  padding: 0.75em;
   margin: 1em 0 0 0;
   text-decoration: none;
   list-style: none;
   color: #333642;
   background-color: white;
+}
+.container .content #active-processes div {
+  padding: 0.2em 0.5em;
+}
+.container .content #active-processes div:nth-child(even) {
+  background-color: rgba(173, 216, 230, 0.24);
 }
 .container .left-side {
   display: flex;
@@ -150,8 +179,14 @@ body {
 .container #current-process-info {
   color: #333642;
   background-color: white;
-  padding: 0.75em;
   margin-top: 1em;
+}
+.container #current-process-info div {
+  padding: 0.2em 0.5em;
+  font-weight: 700;
+}
+.container #current-process-info div:nth-child(even) {
+  background-color: rgba(173, 216, 230, 0.24);
 }
 .container #status {
   flex: 1;
@@ -186,6 +221,7 @@ body {
   justify-content: space-between;
 }
 .container #memory .header .state-container {
+  display: none;
   min-width: 156px;
 }
 .container #active-memory {
@@ -198,19 +234,95 @@ body {
 }
 
 .memory-block {
-  height: 50%;
   font-weight: 700;
   color: white;
   border: 1px solid black;
   box-shadow: inset 0 0 0.25em black;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+.memory-block--process {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .memory-block--unallocated {
   background-color: #758184;
+  justify-content: center;
 }
-.memory-block .label {
+
+#create-processes-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 60%;
+  width: 700px;
+  transform: translate(-50%, -50%);
+  background-color: snow;
+  box-shadow: 0 3px 5px #4a4a4a;
+  display: none;
+  flex-direction: column;
+}
+#create-processes-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  background-color: #333642;
+  color: white;
+}
+#create-processes-modal .modal-header .modal-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  padding: 1em;
+}
+#create-processes-modal .modal-header .modal-close-btn {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 1em;
+}
+#create-processes-modal .modal-body {
+  flex: 1;
+  padding: 1em;
   position: relative;
-  top: 45%;
+  overflow: auto;
+}
+#create-processes-modal .modal-body .modal-container {
+  height: 100%;
+  overflow: auto;
+}
+#create-processes-modal .modal-body .modal-container input {
+  text-align: right;
+}
+#create-processes-modal .modal-body .modal-container .form-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding-bottom: 1em;
+}
+#create-processes-modal .modal-body .modal-container #process-forms-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: -1em;
+}
+#create-processes-modal .modal-body .modal-container .process-form {
+  color: white;
+  background-color: #333642;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 5px #c1c1c1;
+  margin: 1em;
+  padding: 1em;
+  max-width: 160px;
+}
+#create-processes-modal .modal-body .modal-container .form-input-container {
+  margin: 0.25em;
+}
+#create-processes-modal .modal-body .modal-container .process-label {
+  font-weight: 700;
 }
 
 /*# sourceMappingURL=styles.css.map */
